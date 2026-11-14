@@ -1,0 +1,23 @@
+# Операторские пакеты Apple нельзя распространять в репозитории.
+*.ipcc
+*.bundle
+*.plist
+*.mobileprovision
+
+*.log
+state/
+tmp/
+.tmp/
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+Thumbs.db
+desktop.ini
