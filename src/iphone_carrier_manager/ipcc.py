@@ -142,8 +142,11 @@ def inspect_bytes(data):
     for name, content in files.items():
         if name.startswith(bundle + "signatures/"):
             signatures.append(name[len(bundle) :])
-            if name.endswith(".plist"):
-                _plist(content)
+        if name.startswith(bundle) and name.endswith(".plist"):
+            try:
+                plistlib.loads(content)
+            except Exception:
+                raise PackageError("Повреждённый plist внутри bundle.") from None
     return Package(
         identifier,
         version,

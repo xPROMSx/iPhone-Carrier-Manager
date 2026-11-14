@@ -1,7 +1,7 @@
 import asyncio
+import shutil
 import subprocess
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -38,19 +38,11 @@ def test_missing_invalid_and_directory(tmp_path, source, capsys):
 
 
 def test_module_and_console_script(source):
-    for prefix in (
-        [sys.executable, "-m", "iphone_carrier_manager"],
-        [
-            str(
-                Path(sys.executable).parent
-                / (
-                    "iphone-carrier-manager.exe"
-                    if sys.platform == "win32"
-                    else "iphone-carrier-manager"
-                )
-            )
-        ],
-    ):
+    executable = shutil.which("iphone-carrier-manager")
+    assert executable is not None, (
+        "Console script iphone-carrier-manager не установлен или не в PATH"
+    )
+    for prefix in ([sys.executable, "-m", "iphone_carrier_manager"], [executable]):
         result = subprocess.run(prefix + ["check", str(source)], capture_output=True)
         assert result.returncode == 3
         assert b"UNVERIFIED" in result.stdout
@@ -98,3 +90,18 @@ def test_offline_check_does_not_import_device(source, monkeypatch):
 
     monkeypatch.setattr(builtins, "__import__", guarded)
     assert cli.main(["check", str(source)]) == 3
+
+
+def test_utf8_with_cp1252_environment(source):
+    import os
+
+    environment = os.environ.copy()
+    environment.update(PYTHONIOENCODING="cp1252", PYTHONUTF8="0")
+    result = subprocess.run(
+        [sys.executable, "-m", "iphone_carrier_manager", "check", str(source)],
+        capture_output=True,
+        env=environment,
+    )
+    assert result.returncode == 3, result.stderr.decode("utf-8", errors="replace")
+    assert "UNVERIFIED" in result.stdout.decode("utf-8")
+    result.stderr.decode("utf-8")

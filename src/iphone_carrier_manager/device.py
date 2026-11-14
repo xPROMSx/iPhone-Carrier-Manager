@@ -171,7 +171,10 @@ async def read_device(selector=None):
         )
 
         if isinstance(error, ConnectionFailedToUsbmuxdError):
-            message = "USB-служба недоступна. Проверьте Apple Mobile Device Service и iTunes."
+            message = (
+                "USB-доступ через компоненты Apple недоступен. "
+                "Проверьте iTunes или Apple Devices."
+            )
         elif isinstance(error, (PasscodeRequiredError, PasswordRequiredError)):
             message = "iPhone требует разблокировки кодом; разблокируйте его и повторите команду."
         else:

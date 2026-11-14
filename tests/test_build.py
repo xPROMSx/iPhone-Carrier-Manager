@@ -109,3 +109,32 @@ def test_build_input_exit_codes(source, zip_bytes, monkeypatch, case, code, caps
     )
     assert main(["build", "--source", str(source), "--line", "slot:kOne"]) == code
     assert "Пробная подготовка не выполнена" in capsys.readouterr().err
+
+
+def test_source_name_never_printed(source, local_device, capsys):
+    from iphone_carrier_manager.cli import main
+
+    name = "0010-1000-0000-0000-1234.ipcc"  # Выдуманное имя.
+    renamed = source.with_name(name)
+    source.rename(renamed)
+    for args, code in (
+        (["check", str(renamed)], 3),
+        (["check", str(renamed.parent)], 3),
+        (["build", "--source", str(renamed), "--line", "slot:kOne"], 0),
+    ):
+        assert main(args) == code
+        output = capsys.readouterr()
+        for fragment in (name, *name.removesuffix(".ipcc").split("-")):
+            assert fragment not in output.out + output.err
+
+
+def test_corrupt_overrides_rejected(source, zip_bytes, monkeypatch, capsys):
+    source.write_bytes(zip_bytes(extra={"Payload/Test.bundle/overrides_TEST.plist": b"broken"}))
+
+    async def forbidden(*args):
+        pytest.fail("Устройство не должно читаться при битом plist")
+
+    monkeypatch.setattr(build, "read_device", forbidden)
+    assert main(["check", str(source)]) == 1
+    assert main(["build", "--source", str(source), "--line", "slot:kOne"]) == 1
+    assert "plist" in str(capsys.readouterr())

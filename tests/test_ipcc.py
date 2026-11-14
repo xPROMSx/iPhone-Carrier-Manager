@@ -24,8 +24,14 @@ def test_valid(zip_bytes, fmt):
 
 @pytest.mark.parametrize("name", ["../escape", "/absolute", "a/../b", "C:\\file", "a\x01b"])
 def test_unsafe_paths(zip_bytes, name):
+    entry = zipfile.ZipInfo("placeholder")
+    entry.filename = name
+    entry.orig_filename = name
+    data = zip_bytes(extra={entry: b"test"})
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        assert archive.infolist()[-1].orig_filename == name
     with pytest.raises(ipcc.PackageError, match="путь"):
-        ipcc.inspect_bytes(zip_bytes(extra={name: b"test"}))
+        ipcc.inspect_bytes(data)
 
 
 def test_nul_and_duplicate():

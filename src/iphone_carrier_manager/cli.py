@@ -62,8 +62,8 @@ def check_path(path):
     if not paths:
         raise PackageError("В каталоге нет файлов IPCC.")
     codes = []
-    for source in paths:
-        print(f"Файл: {safe(source.name)}")
+    for number, source in enumerate(paths, 1):
+        print(f"Файл №{number}")
         try:
             package = check_file(source)
             profile("Целевой профиль", package.identifier, package.version)
@@ -97,7 +97,6 @@ async def device_command(args):
         print("Полнота списка и активность линий не подтверждены.")
     else:
         package, device, line = await build_file(args.source, args.line)
-        print(f"Источник: {safe(Path(args.source).name)}")
         profile("Текущий профиль линии", line.identifier, line.version)
         profile("Целевой профиль", package.identifier, package.version)
         print(f"Линия: slot:{safe(line.slot)}")
@@ -116,6 +115,10 @@ async def device_command(args):
 
 
 def main(argv=None):
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
     try:
         if args.command == "check":

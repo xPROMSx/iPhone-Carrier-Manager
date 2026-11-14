@@ -26,9 +26,11 @@ telemetry, server or automatic updates.
 Windows 11 x64. Windows 10 is untested. The Python package requires Python >=3.12;
 development and CI use 3.12. The EXE does not require a separate Python installation.
 
-USB access needs Apple Mobile Device Service supplied by iTunes. Library documentation:
+USB access needs working Apple components supplied by iTunes or Apple Devices.
+Some computers use AppleMobileDeviceProcess and have no service named Apple Mobile
+Device Service; its absence alone is not an error. Library documentation:
 https://doronz88.github.io/pymobiledevice3/master/installation/
-Check the service in `services.msc`. The program does not install drivers, modify or
+The program does not install drivers, modify or
 start services, or request administrator privileges automatically. Use a USB cable,
 an unlocked phone and an existing pairing. Establish trust normally outside the program
 if needed, then retry.
@@ -61,8 +63,8 @@ Line activity is not determined. Missing data is reported as an undefined line.
 List completeness is not guaranteed. Nothing on the phone changes. Stop with Ctrl+C.
 
 `check` needs no phone and does not modify the source. It checks one file or immediate
-IPCC children of a directory, without recursion. Results are printed without saving a
-report. SHA-256 describes the source file, not Apple authenticity. Stop with Ctrl+C.
+IPCC children of a directory, without recursion. Results use ordinal file numbers without printing source filenames; no report
+is saved. SHA-256 describes the source file, not Apple authenticity. Stop with Ctrl+C.
 
 `build` needs USB and one explicit IPCC. Selection matches the Slot string exactly:
 `slot:kOne` means neither “SIM 1” nor the enabled line. The same record supplies
@@ -117,7 +119,8 @@ returns 3; successful trial build with UNVERIFIED returns 0. A corrupt package p
 an overall successful directory result.
 
 Limits: 64 MiB source, 64 MiB total expanded data, 10,000 entries. Stored/Deflate only;
-no disk extraction. Absolute paths, `..` segments, backslashes, NUL/control characters,
+no disk extraction. All *.plist files inside the bundle are checked for readability
+without interpreting additional content. Absolute paths, `..` segments, backslashes, NUL/control characters,
 duplicate names, links/special entries, encryption and CRC are checked. Windows
 filesystem naming checks are not performed.
 
