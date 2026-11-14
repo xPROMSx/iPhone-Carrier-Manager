@@ -138,3 +138,59 @@ def test_corrupt_overrides_rejected(source, zip_bytes, monkeypatch, capsys):
     assert main(["check", str(source)]) == 1
     assert main(["build", "--source", str(source), "--line", "slot:kOne"]) == 1
     assert "plist" in str(capsys.readouterr())
+
+
+@pytest.mark.parametrize("explicit_directories", [False, True])
+def test_prepared_directories_load_with_strict_afc(
+    zip_bytes, rows, explicit_directories, monkeypatch, tmp_path
+):
+    import io
+    import posixpath
+    import zipfile
+
+    from pymobiledevice3.services.installation_proxy import (
+        InstallationProxyService,
+        classify_zip_file,
+    )
+
+    extra = {"Payload/Test.bundle/signatures/nested/file": b"synthetic"}
+    if explicit_directories:
+        extra.update(
+            {"Payload/": b"", "Payload/Test.bundle/": b"", "Payload/Test.bundle/empty/": b""}
+        )
+    package = ipcc.inspect_bytes(zip_bytes(extra=extra))
+    lines, _ = device.parse_lines(rows)
+    before = set(tmp_path.rglob("*"))
+    data = build.prepare(package, lines[0])
+    assert set(tmp_path.rglob("*")) == before
+    assert classify_zip_file(data).is_ipcc()
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        names = archive.namelist()
+        assert names[0].endswith(".bundle/")
+        assert names[0] != "Payload/"
+        assert all(name.endswith("/") for name in names[: names.index(names[0] + "Info.plist")])
+
+    class StrictAFC:
+        def __init__(self):
+            self.directories = set()
+            self.files = {}
+
+        async def makedirs(self, name):
+            while name and name not in self.directories:
+                self.directories.add(name)
+                name = posixpath.dirname(name)
+
+        async def set_file_contents(self, name, data, progress=None):
+            assert posixpath.dirname(name) in self.directories
+            self.files[name] = data
+
+    afc = StrictAFC()
+    import logging
+
+    service = object.__new__(InstallationProxyService)
+    service.logger = logging.getLogger("synthetic-loader")
+    asyncio.run(service.upload_ipcc_from_bytes(data, "/synthetic-stage", afc))
+    uploaded = {name.split(".bundle/", 1)[1]: content for name, content in afc.files.items()}
+    assert uploaded == {
+        name[len(package.bundle) :]: content for name, content in package.files.items()
+    }

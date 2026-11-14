@@ -7,6 +7,8 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from iphone_carrier_manager import timeouts
+
 ENDPOINT = "127.0.0.1:27015"
 IMSI_KEY = "InternationalMobileSubscriberIdentity"
 ICCID_KEY = "IntegratedCircuitCardIdentity"
@@ -106,23 +108,32 @@ async def _snapshot(client):
     return Device(text("ProductType"), text("ProductVersion"), text("BuildVersion"), lines, problem)
 
 
-async def _connected(serial, cache, selector):
+async def open_client(serial, cache):
+    """Открыть только существующее сопряжение; клиент закрывает вызывающий код."""
     from pymobiledevice3.lockdown import create_using_usbmux
 
-    client = None
-    try:
-        client = await create_using_usbmux(
-            serial=serial,
-            connection_type="USB",
-            usbmux_address=ENDPOINT,
-            autopair=False,
-            pairing_records_cache_folder=cache,
-        )
-        if not client.paired:
+    client = await create_using_usbmux(
+        serial=serial,
+        connection_type="USB",
+        usbmux_address=ENDPOINT,
+        autopair=False,
+        pairing_records_cache_folder=cache,
+    )
+    if not client.paired:
+        try:
+            await client.close()
+        finally:
             raise DeviceError(
                 "Нет доверенной сессии. Разрешите доверие штатным способом вне программы "
                 "и повторите команду."
             )
+    return client
+
+
+async def _connected(serial, cache, selector):
+    client = None
+    try:
+        client = await open_client(serial, cache)
         first = await _snapshot(client)
         if selector is not None:
             selected = choose_line(first, selector)
@@ -148,7 +159,7 @@ async def read_device(selector=None):
     try:
         from pymobiledevice3.usbmux import list_devices
 
-        devices = await asyncio.wait_for(list_devices(usbmux_address=ENDPOINT), 5)
+        devices = await asyncio.wait_for(list_devices(usbmux_address=ENDPOINT), timeouts.USB)
         usb = [device for device in devices if device.is_usb]
         if not usb:
             raise DeviceError("USB-устройство не найдено. Проверьте кабель и разблокировку.")
@@ -156,9 +167,13 @@ async def read_device(selector=None):
             raise DeviceError("Подключено несколько USB-устройств; выбор не выполнен.")
         existing = Path.home() / ".pymobiledevice3"
         if existing.is_dir():
-            return await asyncio.wait_for(_connected(usb[0].serial, existing, selector), 15)
+            return await asyncio.wait_for(
+                _connected(usb[0].serial, existing, selector), timeouts.READ
+            )
         with tempfile.TemporaryDirectory(prefix="icm-") as folder:
-            return await asyncio.wait_for(_connected(usb[0].serial, Path(folder), selector), 15)
+            return await asyncio.wait_for(
+                _connected(usb[0].serial, Path(folder), selector), timeouts.READ
+            )
     except (TimeoutError, asyncio.CancelledError):
         raise DeviceError("Ожидание USB/lockdown истекло или операция отменена.") from None
     except DeviceError:
