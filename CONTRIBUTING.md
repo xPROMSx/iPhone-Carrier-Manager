@@ -22,7 +22,19 @@ ruff check .
 pytest
 ```
 
-Это установка каркаса для разработки; рабочей программы пока нет.
-Изменения также проверяются через CI на Linux и Windows в PR.
+Команды приложения: `python -m iphone_carrier_manager --help` и
+`iphone-carrier-manager --version`. Тесты выполняются без подключения телефона.
+На Linux: установка с dev-зависимостями, Ruff и pytest.
+На Windows: `python -m pip install -r requirements/windows-build.txt`,
+`python -m pip install -e . --no-deps`, `python -m pip check`, `pytest`, `ruff check .`.
+
+Сборка только на Windows: `python scripts/build_windows.py`. Скрипт собирает onedir,
+проверяет EXE вне исходников и создаёт ZIP. Ожидаемый код offline check равен 3;
+скрипт проверяет его и завершается 0 только при успехе smoke.
+В PR обычные Linux/Windows проверки идут без EXE. Владелец создаёт и ставит метку
+`build-windows` на финальном HEAD. Повторная сборка: снять/поставить метку.
+Новые коммиты не пересобирают EXE. Приватный артефакт хранится 7 дней, содержит
+полный pip freeze. workflow_dispatch доступен после появления события в main.
+Windows 10 и реальный USB в CI не проверяются.
 Пишите сообщение коммита так, чтобы было понятно, что изменилось и зачем.
 Например: «Добавить проверку обязательных шаблонов .gitignore».
