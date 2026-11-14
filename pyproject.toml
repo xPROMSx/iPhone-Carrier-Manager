@@ -4,11 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iphone-carrier-manager"
-version = "0.0.0"
+version = "0.1.0"
 license = "GPL-3.0-or-later"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["pymobiledevice3==11.55.0"]
+
+[project.scripts]
+iphone-carrier-manager = "iphone_carrier_manager.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
