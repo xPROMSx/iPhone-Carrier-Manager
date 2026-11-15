@@ -225,9 +225,12 @@ def test_full_menu(setup_menu, monkeypatch, capsys):
     assert asyncio.run(menu.run_menu(read, print)) == 0
     output = capsys.readouterr().out
     assert all(len(line) <= 78 for line in output.splitlines())
-    for forbidden in ("UNVERIFIED", "донор", "штатный", "Маска", "--previous",
+    for forbidden in ("UNVERIFIED", "донор", "Маска", "--previous",
                       "не проверялось на этой модели"):
         assert forbidden.lower() not in output.lower()
+    assert "Штатный профиль оператора из тестовой базы." in output
+    assert "Линия slot:kOne: example.target, версия 2.0" in output
+    assert output.index("Результат") < output.index("Линия slot:kOne: example.target")
     assert output.count("на свой страх и риск") == 1
     assert "Российские операторы" in output and "Другие операторы" in output
     assert "Для продолжения введите ровно INSTALL:" in output

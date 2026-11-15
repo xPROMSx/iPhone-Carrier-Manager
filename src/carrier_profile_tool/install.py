@@ -269,12 +269,15 @@ def confirm_input():
         raise device.DeviceError("Установка отменена: подтверждение не получено.")
 
 
-def finish(reasons, selector, plain=False):
+def finish(reasons, selector, plain=False, readback=None):
     from carrier_profile_tool.cli import safe
 
     if plain:
         print("\nРезультат")
         print("-" * 62)
+        if readback is not None:
+            show_profiles(readback, plain=True)
+            print()
         if reasons:
             plain_text("НЕ ПОДТВЕРЖДЕНО: " + "; ".join(reasons))
             plain_text("Результат не подтверждён. Проверьте настройки телефона. Не запускайте "
@@ -307,7 +310,7 @@ async def installation_failure_readback(serial, cache, plain=False):
 
 
 async def run_install(source, selector, previous, cache, plain=False, tested=False,
-                      from_database=False):
+                      from_database=False, readback=None):
     from pymobiledevice3.exceptions import AppInstallError
 
     client = None
@@ -366,7 +369,9 @@ async def run_install(source, selector, previous, cache, plain=False, tested=Fal
         except device.DeviceError:
             reasons.append("телефон не вернулся или не удалось прочитать его за 300 с")
         else:
-            if not plain:
+            if plain:
+                readback.append(after)
+            else:
                 show_profiles(after)
             reasons.extend(verify_result(before, after, selector, source))
         return reasons
@@ -389,6 +394,7 @@ async def install_packages(source, previous, selector, plain=False, tested=False
     disabled = logging.root.manager.disable
     logging.disable(logging.CRITICAL)
     result = None
+    readback = []
     try:
         existing = Path.home() / ".pymobiledevice3"
         context = (
@@ -399,7 +405,8 @@ async def install_packages(source, previous, selector, plain=False, tested=False
         with context as folder:
             if plain:
                 result = await run_install(source, selector, previous, Path(folder), plain=True,
-                                           tested=tested, from_database=from_database)
+                                           tested=tested, from_database=from_database,
+                                           readback=readback)
             else:
                 result = await run_install(source, selector, previous, Path(folder))
     except (Exception, asyncio.CancelledError, KeyboardInterrupt):
@@ -408,4 +415,5 @@ async def install_packages(source, previous, selector, plain=False, tested=False
         result.append("не удалось завершить очистку временного каталога")
     finally:
         logging.disable(disabled)
-    return finish(result, selector, plain=True) if plain else finish(result, selector)
+    return (finish(result, selector, plain=True, readback=readback[0] if readback else None)
+            if plain else finish(result, selector))

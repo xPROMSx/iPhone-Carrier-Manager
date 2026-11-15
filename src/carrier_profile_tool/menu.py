@@ -1,7 +1,6 @@
 """Пошаговый выбор одной линии и двух пакетов; пакеты остаются в памяти."""
 
 import asyncio
-import re
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -160,8 +159,7 @@ async def steps(console):
                 name = NAMES.get(item.operator, item.operator)
                 wrapped(out, f"{number}. {safe(name)}, версия {safe(item.version)}", "  ")
                 if item.note:
-                    note = re.sub(r"\bштатный\s+", "", safe(item.note), flags=re.IGNORECASE)
-                    wrapped(out, note, "     ")
+                    wrapped(out, safe(item.note), "     ")
     out("")
     out("Свой файл:")
     out(f"  {len(items) + 1}. Указать свой файл (IPCC или папку .bundle)")
