@@ -1,6 +1,6 @@
 Технические заметки для разработчиков; часть сведений может устареть
 
-[English](README_EN.md)
+[English](../README_EN.md)
 
 # iPhone-Carrier-Manager
 
@@ -49,7 +49,7 @@ https://doronz88.github.io/pymobiledevice3/master/installation/
 
 Python-пакет из checkout: `python -m pip install .`.
 Команды доступны также через `python -m iphone_carrier_manager`.
-Разработка: [CONTRIBUTING.md](CONTRIBUTING.md).
+Разработка: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## Использование
 
@@ -193,8 +193,8 @@ Lockdown, затем локальный каталог. Если `~/.pymobiledev
 
 Совместимость установки, 5G, VoWiFi и откат не подтверждены. Текущий профиль не считается
 заводским. Предупреждения антивируса и Windows 10 не проверены.
-Источники и результаты: [VERIFICATION](docs/VERIFICATION.md).
-О сообщениях об уязвимостях: [SECURITY.md](SECURITY.md).
+Источники и результаты: [VERIFICATION](VERIFICATION.md).
+О сообщениях об уязвимостях: [SECURITY.md](../SECURITY.md).
 
 ## Другие проекты
 
@@ -207,9 +207,9 @@ Lockdown, затем локальный каталог. Если `~/.pymobiledev
 
 - [СБП / CloudTips (QR, Мир, приложение банка)](https://pay.cloudtips.ru/p/9f240c8b).
 - [Tribute (банковская карта)](https://web.tribute.tg/d/S0p).
-- [Все способы поддержки](docs/SUPPORT.md), включая криптовалюты и QR-коды.
+- [Все способы поддержки](SUPPORT.md), включая криптовалюты и QR-коды.
 
 ## Лицензия
 
-[GNU GPL v3 или более поздняя версия](LICENSE) (GPL-3.0-or-later).
-Сведения о библиотеках: [NOTICE](NOTICE).
+[GNU GPL v3 или более поздняя версия](../LICENSE) (GPL-3.0-or-later).
+Сведения о библиотеках: [NOTICE](../NOTICE).
