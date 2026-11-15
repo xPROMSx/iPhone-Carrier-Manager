@@ -17,7 +17,7 @@
 Пример:
     python scripts/build_database.py --apple-ipcc Vodafone_hu_69.1.ipcc \\
         --dump-dir путь/к/ios-carrier-bundles \\
-        --out src/iphone_carrier_manager/profiles.json
+        --out src/carrier_profile_tool/profiles.json
 """
 import argparse
 import hashlib
