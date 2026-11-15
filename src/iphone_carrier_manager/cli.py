@@ -34,7 +34,9 @@ class Parser(argparse.ArgumentParser):
 
 
 def parser():
-    result = Parser(prog="iphone-carrier-manager", description="Чтение и пробная подготовка IPCC.")
+    result = Parser(
+        prog="iphone-carrier-manager", description="Чтение, подготовка и установка IPCC."
+    )
     result.add_argument("--version", action="version", version=__version__, help="Показать версию")
     commands = result.add_subparsers(dest="command", required=True)
     commands.add_parser("info", help="Прочитать ранее сопряжённый iPhone через USB")
@@ -43,6 +45,12 @@ def parser():
     build = commands.add_parser("build", help="Пробно подготовить IPCC только в памяти")
     build.add_argument("--source", required=True, help="Исходный IPCC")
     build.add_argument("--line", required=True, help="Точный селектор, например slot:kOne")
+    install = commands.add_parser(
+        "install", help="Установить IPCC на одну линию и перезагрузить iPhone"
+    )
+    install.add_argument("--source", required=True, help="Устанавливаемый IPCC")
+    install.add_argument("--line", required=True, help="Точный селектор, например slot:kOne")
+    install.add_argument("--previous", required=True, help="IPCC для возврата к текущему профилю")
     return result
 
 
@@ -121,6 +129,10 @@ def main(argv=None):
             reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
     try:
+        if args.command == "install":
+            from iphone_carrier_manager.install import install_file
+
+            return asyncio.run(install_file(args.source, args.line, args.previous))
         if args.command == "check":
             return check_path(args.path)
         return asyncio.run(device_command(args))

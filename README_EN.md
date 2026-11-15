@@ -2,23 +2,25 @@
 
 # iPhone-Carrier-Manager
 
-v0.1 reads an already paired iPhone over USB, checks local IPCC files,
-and performs trial package preparation in memory. It does not write to the iPhone.
+v0.2 reads an already paired iPhone over USB, checks and prepares IPCC files
+in memory, and installs a profile on one selected line with a reboot and readback.
 
 ## Development status
 
 The implementation needs owner verification on Windows 11 and a real device.
 The schema was observed on one iPhone 17 Pro running iOS 27.2.1 only.
 Slot semantics and completeness of the eSIM list are unproven. Support for other
-phones and iOS versions is not claimed. Cryptographic verification is deferred to v0.2.
+phones and iOS versions is not claimed. Cryptographic verification is not implemented; signatures remain UNVERIFIED.
 
 ## Features
 
 - `info`: device information and available carrier records.
 - `check`: ZIP/plist, metadata, signature-file discovery and source SHA-256.
 - `build`: trial renaming of the outer bundle in memory, comparing inner files byte for byte.
+- `install`: one installation, one reboot, and verification by reading the phone.
 
-No installation, reboot, export, carrier catalogue, IPCC downloads, history, GUI,
+No profile removal, automatic installation/reboot retries, export, carrier catalogue,
+IPCC downloads, history, GUI,
 telemetry, server or automatic updates.
 
 ## Requirements
@@ -84,36 +86,95 @@ full outer name or prepared-ZIP hash are printed. Stop with Ctrl+C; processing e
 does not establish iOS compatibility or suitability for installation, even after
 future signature verification. The signature is currently unverified.**
 
+## Installing a profile on one line
+
+**The install command writes a carrier profile and restarts the entire iPhone.**
+It may change carrier settings. Compatibility and a complete return to the previous
+state are untested. The program does not remove profiles. Returning means installing
+the previous package again, not restoring the phone's complete state.
+UNVERIFIED means that package authenticity has not been checked cryptographically.
+Keep the cable connected and leave the phone alone until the operation ends; unlock it after reboot.
+
+Prepare both the new IPCC and a package matching the current profile for returning.
+A matching identifier with a different version provides only an approximate return.
+A different identifier prevents installation. Reinstalling the same package is allowed.
+Each command targets one line using its exact Slot value.
+
+```text
+iphone-carrier-manager install --source new.ipcc --line slot:kOne --previous previous.ipcc
+```
+
+Before writing, the program checks both files, rereads the phone in the same session,
+and displays the model, iOS, selected line, current and target profiles, return type and warnings.
+iOS versions other than 27.2.1 produce an additional warning.
+Continuing requires a terminal and exactly `INSTALL`, case sensitive, without surrounding spaces.
+Redirected stdin is rejected. No writing occurs before this confirmation.
+
+Installation is called once with a 120-second limit. Only Complete permits a single restart.
+A service refusal, disconnect, timeout or Ctrl+C during installation prevents reboot;
+the program attempts one read of the profiles. The installation result may remain unknown.
+An automatic retry is not a safe continuation: read `info` and inspect the phone first.
+
+USB detachment is awaited for up to 60 seconds, then return and readback share a 300-second limit.
+Polling runs once per second. A device-list error does not count as detachment.
+If a passcode is required, the program reminds you to unlock the iPhone. If detachment
+was not observed, readback continues but the result remains unconfirmed.
+Ctrl+C after installation starts produces an unconfirmed result; it does not undo a write.
+
+`ПОДТВЕРЖДЕНО (перезагрузка подтверждена косвенно)` (confirmed, reboot inferred indirectly)
+and exit code 0 require all of: Complete, a successful restart request, observed USB absence,
+return of the same phone, the exact target identifier and version, and unchanged line membership
+and other lines. Errors closing connections after successful restart do not invalidate it.
+A matching profile alone is insufficient, including when reinstalling the same package.
+`НЕ ПОДТВЕРЖДЕНО` (unconfirmed), a reason and exit code 4 mean insufficient confirmation,
+not a proven failure. If restart fails, reboot manually and run `info`.
+
+To return, install the previous package yourself with the files exchanged:
+
+```text
+iphone-carrier-manager install --source previous.ipcc --line slot:kOne --previous new.ipcc
+```
+
+This also requires checks and confirmation and cannot guarantee a complete return.
+If the actual current profile does not match the `--previous` package, preflight rejects
+the command. Do not bypass the check; inspect the phone first.
+
 ## What the program changes on your phone
 
-No settings, profiles, files or trust are changed. An existing lockdown session is used.
-Autopairing is explicitly disabled. No AFC, installation services, Diagnostics, Wi-Fi
-or tunnels are used.
+`info`, `check` and `build` do not change settings, profiles, files or trust.
+`install` uses AFC to stage the unpacked package in `/PublicStaging/pymobiledevice3/<uuid>.ipcc`,
+then calls the CarrierBundle installation service and Diagnostics restart. The library attempts
+nonrecursive removal without checking the result: files containing identifiers may remain
+on the phone. The program does not clean PublicStaging. Existing pairing is used with
+autopairing disabled. Wi-Fi and tunnels are not used.
 
 On the computer, the library reads existing pairing records from usbmuxd, the system
 Apple Lockdown folder, then its local folder. If `~/.pymobiledevice3` is absent, an
-operation-scoped temporary folder is used and removed afterwards. No new pairing
-records are created.
+operation-scoped temporary folder is used and removed afterwards. It remains available through
+post-reboot readback; reconnects use the same source. No new pairing records are created.
+Prepared ZIP bytes and full identifiers are never written to the computer disk.
 
 Standard TLS handling may temporarily write the existing host certificate and private
 key into system temp. The library removes it in finally, but writes before try:
 cleanup after write failure, crash or power loss is not guaranteed. Physical erasure
 of memory, swap, crash dumps or file copies is not promised. Cancellation before the
 factory returns may leave its internal connection open until process exit; the OS
-closes it then. No application retries. Timeouts: usbmux 5 s; connection and reading
+closes it then. Installation/restart are never retried; only polling and reading repeat
+after restart. Timeouts: usbmux 5 s; connection and reading
 15 s combined, including any library reconnection.
 
 ## Safety and limitations
 
-In v0.1 the signature is always `UNVERIFIED`: signed-data rules and key provenance
+In v0.2 the signature is always `UNVERIFIED`: signed-data rules and key provenance
 are unconfirmed. Signature files alone prove no authenticity; absence is reported.
 `VERIFIED` would require complete mathematical verification with a trusted key, without
 proving installation compatibility. `INVALID` means a failed supported cryptographic
-check; that check is not implemented in v0.1. Unsupported formats are distinguished
+check; that check is not implemented in v0.2. Unsupported formats are distinguished
 from corrupt ZIP/plist files.
 
-Exit codes: 0 success (build is trial only), 1 corruption/device/data error or
-cancellation, 2 arguments, 3 incomplete check or unsupported format. Unknown structure
+Exit codes: 0 success (build is trial only; install is confirmed by readback),
+1 corruption/device/data error or cancellation before installation, 2 arguments,
+3 incomplete check or unsupported format, 4 unconfirmed result after installation starts. Unknown structure
 and multiple bundles return 3 in both check and build. A valid check with UNVERIFIED
 returns 3; successful trial build with UNVERIFIED returns 0. A corrupt package prevents
 an overall successful directory result.

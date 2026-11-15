@@ -142,10 +142,11 @@ def test_line_rejections(rows, mutation):
         device.choose_line(device.Device("x", "27.2.1", "x", lines, problem), "slot:kOne")
 
 
-def test_no_forbidden_imports():
+def test_no_write_service_imports_in_read_only_modules():
     root = Path(__file__).resolve().parents[1] / "src"
     forbidden = {"installation_proxy", "afc", "diagnostics"}
-    for path in root.rglob("*.py"):
+    for name in ("device.py", "build.py", "ipcc.py"):
+        path = root / "iphone_carrier_manager" / name
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             names = []
             if isinstance(node, ast.Import):

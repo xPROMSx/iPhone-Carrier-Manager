@@ -29,6 +29,7 @@ def smoke(executable):
         environment = os.environ.copy()
         environment.pop("PYTHONPATH", None)
         environment["PYTHONUTF8"] = "1"
+        environment["ICM_IMPORT_SMOKE"] = "1"
         for args, code in ((["--help"], 0), (["--version"], 0), (["check", str(source)], 3)):
             result = subprocess.run(
                 [str(executable), *args],
@@ -73,6 +74,11 @@ def main():
             "--clean",
             "--onedir",
             "--console",
+            "--runtime-hook",
+            str(ROOT / "scripts" / "import_services.py"),
+            "--hidden-import=pymobiledevice3.services.installation_proxy",
+            "--hidden-import=pymobiledevice3.services.diagnostics",
+            "--hidden-import=pymobiledevice3.services.afc",
             "--name",
             NAME,
             "--specpath",
