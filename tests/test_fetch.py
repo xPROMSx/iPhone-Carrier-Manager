@@ -10,8 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from iphone_carrier_manager import fetch, profiles
-from iphone_carrier_manager.ipcc import PackageError
+from carrier_profile_tool import fetch, profiles
+from carrier_profile_tool.ipcc import PackageError
 
 
 def selected(data):

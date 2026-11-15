@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from iphone_carrier_manager import device
+from carrier_profile_tool import device
 
 
 @pytest.fixture
@@ -146,7 +146,7 @@ def test_no_write_service_imports_in_read_only_modules():
     root = Path(__file__).resolve().parents[1] / "src"
     forbidden = {"installation_proxy", "afc", "diagnostics"}
     for name in ("device.py", "build.py", "ipcc.py"):
-        path = root / "iphone_carrier_manager" / name
+        path = root / "carrier_profile_tool" / name
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             names = []
             if isinstance(node, ast.Import):

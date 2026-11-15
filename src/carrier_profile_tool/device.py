@@ -7,7 +7,7 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from iphone_carrier_manager import timeouts
+from carrier_profile_tool import timeouts
 
 ENDPOINT = "127.0.0.1:27015"
 IMSI_KEY = "InternationalMobileSubscriberIdentity"

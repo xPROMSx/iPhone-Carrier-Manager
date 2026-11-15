@@ -11,7 +11,7 @@ from importlib.metadata import distributions
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = "iphone-carrier-manager"
+NAME = "CarrierProfileTool"
 
 
 def smoke(executable):
@@ -31,7 +31,7 @@ def smoke(executable):
         environment["PYTHONUTF8"] = "1"
         environment["ICM_IMPORT_SMOKE"] = "1"
         for args, code in (
-            (["--help"], 0), (["--version"], 0), (["check", str(source)], 3),
+            ([], 0), (["--help"], 0), (["--version"], 0), (["check", str(source)], 3),
             (["profiles", "--product", "iPhone18,1"], 0),
         ):
             result = subprocess.run(
@@ -39,10 +39,14 @@ def smoke(executable):
                 cwd=folder,
                 env=environment,
                 capture_output=True,
+                input=b"0\n",
+                timeout=60,
             )
             if result.returncode != code or (code == 3 and b"UNVERIFIED" not in result.stdout):
                 raise RuntimeError("Offline smoke EXE не пройден.")
-            if args[0] == "profiles" and "Группа:" not in result.stdout.decode("utf-8"):
+            if not args and "1 - продолжить" not in result.stdout.decode("utf-8"):
+                raise RuntimeError("Меню EXE не открылось на экране приветствия.")
+            if args and args[0] == "profiles" and "Группа:" not in result.stdout.decode("utf-8"):
                 raise RuntimeError("База профилей отсутствует в EXE или smoke не пройден.")
 
 
@@ -79,7 +83,7 @@ def main():
             "--clean",
             "--onedir",
             "--console",
-            "--collect-data=iphone_carrier_manager",
+            "--collect-data=carrier_profile_tool",
             "--runtime-hook",
             str(ROOT / "scripts" / "import_services.py"),
             "--hidden-import=pymobiledevice3.services.installation_proxy",
@@ -93,7 +97,7 @@ def main():
             str(ROOT / "build" / "pyinstaller"),
             "--distpath",
             str(ROOT / "dist"),
-            str(ROOT / "src" / "iphone_carrier_manager" / "__main__.py"),
+            str(ROOT / "src" / "carrier_profile_tool" / "__main__.py"),
         ],
         cwd=ROOT,
         check=True,

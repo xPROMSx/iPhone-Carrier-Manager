@@ -7,8 +7,8 @@ import re
 import sys
 from pathlib import Path
 
-from iphone_carrier_manager import __version__
-from iphone_carrier_manager.ipcc import SIGNATURE_REASON, PackageError, check_file
+from carrier_profile_tool import __version__
+from carrier_profile_tool.ipcc import SIGNATURE_REASON, PackageError, check_file
 
 
 def safe(value):
@@ -36,10 +36,11 @@ class Parser(argparse.ArgumentParser):
 
 def parser():
     result = Parser(
-        prog="iphone-carrier-manager", description="Чтение, подготовка и установка IPCC."
+        prog="carrier-profile-tool", description="Чтение, подготовка и установка IPCC."
     )
     result.add_argument("--version", action="version", version=__version__, help="Показать версию")
-    commands = result.add_subparsers(dest="command", required=True)
+    commands = result.add_subparsers(dest="command")
+    commands.add_parser("menu", help="Открыть пошаговое меню")
     commands.add_parser("info", help="Прочитать ранее сопряжённый iPhone через USB")
     check = commands.add_parser("check", help="Проверить локальный IPCC или каталог")
     check.add_argument("path", help="IPCC или каталог")
@@ -61,7 +62,7 @@ def parser():
 
 
 async def profiles_command(args):
-    from iphone_carrier_manager.profiles import (
+    from carrier_profile_tool.profiles import (
         group_for_product,
         load_database,
         profiles_for_product,
@@ -73,7 +74,7 @@ async def profiles_command(args):
         return 0
     product = args.product
     if product is None:
-        from iphone_carrier_manager.device import read_device
+        from carrier_profile_tool.device import read_device
 
         product = (await read_device()).product
     selected = profiles_for_product(database, product)
@@ -97,8 +98,8 @@ async def profiles_command(args):
 
 
 def fetch_command(args):
-    from iphone_carrier_manager.fetch import fetch_profile, save_ipcc
-    from iphone_carrier_manager.profiles import ProfileError, get_profile, load_database
+    from carrier_profile_tool.fetch import fetch_profile, save_ipcc
+    from carrier_profile_tool.profiles import ProfileError, get_profile, load_database
 
     item = get_profile(load_database(), args.id)
     # lexists учитывает также существующую, но неработающую символьную ссылку.
@@ -146,8 +147,8 @@ def check_path(path):
 
 
 async def device_command(args):
-    from iphone_carrier_manager.build import WARNING, build_file
-    from iphone_carrier_manager.device import read_device
+    from carrier_profile_tool.build import WARNING, build_file
+    from carrier_profile_tool.device import read_device
 
     if args.command == "info":
         device = await read_device()
@@ -186,12 +187,16 @@ def main(argv=None):
             reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
     try:
+        if args.command in (None, "menu"):
+            from carrier_profile_tool.menu import run_menu
+
+            return asyncio.run(run_menu())
         if args.command == "profiles":
             return asyncio.run(profiles_command(args))
         if args.command == "fetch":
             return fetch_command(args)
         if args.command == "install":
-            from iphone_carrier_manager.install import install_file
+            from carrier_profile_tool.install import install_file
 
             return asyncio.run(install_file(args.source, args.line, args.previous))
         if args.command == "check":
@@ -205,7 +210,7 @@ def main(argv=None):
         print(f"{prefix}: {error}", file=sys.stderr)
         return error.code
     except Exception as error:
-        from iphone_carrier_manager.device import DeviceError
+        from carrier_profile_tool.device import DeviceError
 
         message = str(error) if isinstance(error, DeviceError) else "Операция не выполнена."
         prefix = "Пробная подготовка не выполнена" if args.command == "build" else "Ошибка"
