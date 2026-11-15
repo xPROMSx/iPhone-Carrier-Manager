@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from iphone_carrier_manager import cli, device, install, timeouts
+from carrier_profile_tool import cli, device, install, timeouts
 
 
 @pytest.fixture

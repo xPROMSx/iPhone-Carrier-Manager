@@ -8,7 +8,7 @@ import zipfile
 
 import pytest
 
-from iphone_carrier_manager import ipcc
+from carrier_profile_tool import ipcc
 
 
 @pytest.mark.parametrize("fmt", [plistlib.FMT_XML, plistlib.FMT_BINARY])

@@ -1,4 +1,4 @@
-iPhone-Carrier-Manager: GPL-3.0-or-later, см. LICENSE.
+Carrier Profile Tool: GPL-3.0-or-later, см. LICENSE.
 
 Runtime: pymobiledevice3 11.55.0
 https://github.com/doronz88/pymobiledevice3

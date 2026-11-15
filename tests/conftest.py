@@ -123,7 +123,7 @@ def network(monkeypatch):
     """Подстановка транспорта: тесты не выполняют реальные сетевые операции."""
     from types import SimpleNamespace
 
-    from iphone_carrier_manager import fetch
+    from carrier_profile_tool import fetch
 
     state = SimpleNamespace(now=0, urls=[], timeouts=[], bodies={}, step=0, block=65536,
                             error=None, closed=0, opens=0)

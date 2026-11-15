@@ -5,8 +5,8 @@ import json
 
 import pytest
 
-from iphone_carrier_manager import profiles
-from iphone_carrier_manager.ipcc import MAX_ARCHIVE
+from carrier_profile_tool import profiles
+from carrier_profile_tool.ipcc import MAX_ARCHIVE
 
 
 def test_valid_database(profile_data, files_data):

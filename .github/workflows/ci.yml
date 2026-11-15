@@ -77,7 +77,7 @@ jobs:
           "SOURCE_COMMIT=$sourceCommit" >> $env:GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
-          name: iphone-carrier-manager-${{ env.SOURCE_COMMIT }}
+          name: CarrierProfileTool-${{ env.SOURCE_COMMIT }}
           path: |
             dist/*.zip
             windows-freeze.txt

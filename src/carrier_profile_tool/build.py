@@ -3,8 +3,8 @@
 import io
 import zipfile
 
-from iphone_carrier_manager.device import choose_line, read_device
-from iphone_carrier_manager.ipcc import PackageError, check_file, inspect_bytes
+from carrier_profile_tool.device import choose_line, read_device
+from carrier_profile_tool.ipcc import PackageError, check_file, inspect_bytes
 
 WARNING = (
     "Результат не сохраняется, на iPhone не устанавливался. Успех подготовки не означает "

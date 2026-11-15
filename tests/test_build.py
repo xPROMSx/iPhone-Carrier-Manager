@@ -3,8 +3,8 @@ from dataclasses import replace
 
 import pytest
 
-from iphone_carrier_manager import build, device, ipcc
-from iphone_carrier_manager.cli import main
+from carrier_profile_tool import build, device, ipcc
+from carrier_profile_tool.cli import main
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ def test_build_input_exit_codes(source, zip_bytes, monkeypatch, case, code, caps
 
 
 def test_source_name_never_printed(source, local_device, capsys):
-    from iphone_carrier_manager.cli import main
+    from carrier_profile_tool.cli import main
 
     name = "0010-1000-0000-0000-1234.ipcc"  # Выдуманное имя.
     renamed = source.with_name(name)

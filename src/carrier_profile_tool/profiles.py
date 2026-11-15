@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from importlib.resources import files
 from urllib.parse import urlsplit
 
-from iphone_carrier_manager.ipcc import MAX_ARCHIVE, PackageError
+from carrier_profile_tool.ipcc import MAX_ARCHIVE, PackageError
 
 ALLOWED_HOSTS = frozenset(("updates.cdn-apple.com", "raw.githubusercontent.com"))
 
@@ -245,7 +245,7 @@ def parse_database(data):
 def load_database():
     try:
         data = json.loads(
-            files("iphone_carrier_manager").joinpath("profiles.json").read_text(encoding="utf-8")
+            files("carrier_profile_tool").joinpath("profiles.json").read_text(encoding="utf-8")
         )
     except (OSError, ValueError):
         raise ProfileError(

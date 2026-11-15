@@ -10,8 +10,8 @@ import zipfile
 from pathlib import Path
 from urllib.parse import quote, urljoin
 
-from iphone_carrier_manager.ipcc import MAX_ARCHIVE, MAX_ENTRIES, MAX_EXPANDED, inspect_bytes
-from iphone_carrier_manager.profiles import FilesSource, IpccSource, ProfileError, validate_url
+from carrier_profile_tool.ipcc import MAX_ARCHIVE, MAX_ENTRIES, MAX_EXPANDED, inspect_bytes
+from carrier_profile_tool.profiles import FilesSource, IpccSource, ProfileError, validate_url
 
 IO_TIMEOUT = 30
 FILE_TIMEOUT = 120

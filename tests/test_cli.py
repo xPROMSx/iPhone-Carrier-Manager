@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from iphone_carrier_manager import cli, device
+from carrier_profile_tool import cli, device
 
 
 def test_offline_check(source, capsys):
@@ -38,11 +38,11 @@ def test_missing_invalid_and_directory(tmp_path, source, capsys):
 
 
 def test_module_and_console_script(source):
-    executable = shutil.which("iphone-carrier-manager")
+    executable = shutil.which("carrier-profile-tool")
     assert executable is not None, (
-        "Console script iphone-carrier-manager не установлен или не в PATH"
+        "Console script carrier-profile-tool не установлен или не в PATH"
     )
-    for prefix in ([sys.executable, "-m", "iphone_carrier_manager"], [executable]):
+    for prefix in ([sys.executable, "-m", "carrier_profile_tool"], [executable]):
         result = subprocess.run(prefix + ["check", str(source)], capture_output=True)
         assert result.returncode == 3
         assert b"UNVERIFIED" in result.stdout
@@ -98,7 +98,7 @@ def test_utf8_with_cp1252_environment(source):
     environment = os.environ.copy()
     environment.update(PYTHONIOENCODING="cp1252", PYTHONUTF8="0")
     result = subprocess.run(
-        [sys.executable, "-m", "iphone_carrier_manager", "check", str(source)],
+        [sys.executable, "-m", "carrier_profile_tool", "check", str(source)],
         capture_output=True,
         env=environment,
     )

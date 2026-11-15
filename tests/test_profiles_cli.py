@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from iphone_carrier_manager import cli, device, fetch, profiles
+from carrier_profile_tool import cli, device, fetch, profiles
 
 
 def use_database(monkeypatch, data):
@@ -60,7 +60,7 @@ def test_offline_profiles_and_fetch_no_device_import(profile_data, monkeypatch, 
     original = builtins.__import__
 
     def guarded(name, *args, **kwargs):
-        if name.startswith("pymobiledevice3") or name == "iphone_carrier_manager.device":
+        if name.startswith("pymobiledevice3") or name == "carrier_profile_tool.device":
             pytest.fail("команда импортирует модуль устройства")
         return original(name, *args, **kwargs)
 

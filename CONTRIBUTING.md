@@ -22,8 +22,8 @@ ruff check .
 pytest
 ```
 
-Команды приложения: `python -m iphone_carrier_manager --help` и
-`iphone-carrier-manager --version`. Тесты выполняются без подключения телефона.
+Команды приложения: `python -m carrier_profile_tool --help` и
+`carrier-profile-tool --version`. Тесты выполняются без подключения телефона.
 На Linux: установка с dev-зависимостями, Ruff и pytest.
 На Windows: `python -m pip install -r requirements/windows-build.txt`,
 `python -m pip install -e . --no-deps`, `python -m pip check`, `pytest`, `ruff check .`.

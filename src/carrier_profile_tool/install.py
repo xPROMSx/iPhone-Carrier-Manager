@@ -9,9 +9,9 @@ from enum import Enum, auto
 from pathlib import Path
 from time import monotonic
 
-from iphone_carrier_manager import device, timeouts
-from iphone_carrier_manager.build import prepare
-from iphone_carrier_manager.ipcc import check_file
+from carrier_profile_tool import device, timeouts
+from carrier_profile_tool.build import prepare
+from carrier_profile_tool.ipcc import check_file
 
 pause = asyncio.sleep
 
@@ -169,7 +169,7 @@ def verify_result(before, after, selector, package):
 
 
 def show_profiles(snapshot):
-    from iphone_carrier_manager.cli import profile, safe
+    from carrier_profile_tool.cli import profile, safe
 
     for line in snapshot.lines:
         print(f"Линия slot:{safe(line.slot)}")
@@ -179,7 +179,7 @@ def show_profiles(snapshot):
 
 
 def confirm(before, selector, package, rollback):
-    from iphone_carrier_manager.cli import profile, safe
+    from carrier_profile_tool.cli import profile, safe
 
     line = device.choose_line(before, selector)
     print(f"Модель: {safe(before.product)}; iOS: {safe(before.ios)}")
@@ -215,7 +215,7 @@ def confirm(before, selector, package, rollback):
 
 
 def finish(reasons, selector):
-    from iphone_carrier_manager.cli import safe
+    from carrier_profile_tool.cli import safe
 
     if reasons:
         print("НЕ ПОДТВЕРЖДЕНО: " + "; ".join(reasons))
@@ -223,7 +223,7 @@ def finish(reasons, selector):
         print("ПОДТВЕРЖДЕНО (перезагрузка подтверждена косвенно)")
     print(
         "Для возврата повторно установите прежний пакет (возврат не гарантирован):\n"
-        "iphone-carrier-manager install --source <прежний-IPCC> "
+        "carrier-profile-tool install --source <прежний-IPCC> "
         f"--line {safe(selector)} --previous <устанавливаемый-сейчас-IPCC>"
     )
     return 4 if reasons else 0

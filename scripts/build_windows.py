@@ -11,7 +11,7 @@ from importlib.metadata import distributions
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = "iphone-carrier-manager"
+NAME = "CarrierProfileTool"
 
 
 def smoke(executable):
@@ -79,7 +79,7 @@ def main():
             "--clean",
             "--onedir",
             "--console",
-            "--collect-data=iphone_carrier_manager",
+            "--collect-data=carrier_profile_tool",
             "--runtime-hook",
             str(ROOT / "scripts" / "import_services.py"),
             "--hidden-import=pymobiledevice3.services.installation_proxy",
@@ -93,7 +93,7 @@ def main():
             str(ROOT / "build" / "pyinstaller"),
             "--distpath",
             str(ROOT / "dist"),
-            str(ROOT / "src" / "iphone_carrier_manager" / "__main__.py"),
+            str(ROOT / "src" / "carrier_profile_tool" / "__main__.py"),
         ],
         cwd=ROOT,
         check=True,
