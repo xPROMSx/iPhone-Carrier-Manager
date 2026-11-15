@@ -51,6 +51,7 @@ def rig(monkeypatch, values, rows, tmp_path, zip_bytes, capsys):
         tty=True,
         recovery_error=False,
         read_error=False,
+        transient=None,
         refresh_changed=False,
     )
     serial = "synthetic-serial-secret"
@@ -76,6 +77,10 @@ def rig(monkeypatch, values, rows, tmp_path, zip_bytes, capsys):
         def __init__(self):
             self.initial = state.phase == "before"
             self.all_values = copy.deepcopy(state.before if self.initial else state.after)
+            if not self.initial and state.transient is not None:
+                # Первое чтение после перезагрузки: SIM ещё не зарегистрировалась.
+                self.all_values = copy.deepcopy(state.transient)
+                state.transient = None
 
         async def get_value(self, domain=None, key=None):
             state.events.append("read")
@@ -339,6 +344,19 @@ def test_unconfirmed(rig, case):
         assert "другая версия того же профиля" in rig.output.out
     if case == "other_line":
         assert "ВНИМАНИЕ" in rig.output.out
+
+
+@pytest.mark.parametrize("broken", ["missing_line", "no_field"])
+def test_incomplete_first_readback_is_retried(rig, broken):
+    transient = copy.deepcopy(rig.after)
+    if broken == "missing_line":
+        transient["CarrierBundleInfoArray"].pop()
+    else:
+        del transient["CarrierBundleInfoArray"][0]["MNC"]
+    rig.transient = transient
+    assert rig.run() == 0
+    assert "состав линий изменился" not in rig.output.out
+    assert rig.post_reads == 2
 
 
 @pytest.mark.parametrize("password_error", [False, True])
