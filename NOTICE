@@ -13,6 +13,8 @@ Cryptography является транзитивной зависимостью;
 Сборка: PyInstaller 6.22.3 (GPL-2.0-or-later с исключением для bootloader;
 часть файлов Apache-2.0), см. https://pyinstaller.org/en/stable/license.html.
 Python runtime: PSF и сопутствующие лицензии.
+Скачивание, проверка хешей и сборка ZIP используют только стандартную библиотеку
+Python (urllib, hashlib, zipfile); дополнительных runtime-зависимостей нет.
 
 Windows-папка комплектуется доступными LICENSE/COPYING/NOTICE окружения
 в licenses/ и перечнем версий. Полный pip freeze хранится в приватном артефакте.
