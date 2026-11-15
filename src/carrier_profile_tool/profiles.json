@@ -90,11 +90,9 @@
         "G2",
         "G3",
         "G4",
-        "G5",
-        "G6",
         "G7"
       ],
-      "note": "Пакет с серверов Apple (iOS 26.4+). Для российских SIM не проверялся.",
+      "note": "Профиль оператора из Венгрии.",
       "source": {
         "type": "ipcc",
         "url": "https://updates.cdn-apple.com/20260324/carrierbundles/032-21361/97A3F062-376F-444C-AFCA-72ABB6109E84/Vodafone_hu_iPhone.ipcc",
@@ -102,6 +100,104 @@
         "sha256": "a385579e811cbcb53e801c98045010736a0e222e193e0f074c2224d951af5b87",
         "sha1": "be805eec750b8144caeeb6be2dccf545d4d1004f",
         "sha384": "87902333c327079364f17ea7ecea5e8e4e14681e7c16d86b07a62d1e4b5f3b05930267f1366d42449478c79c26fc6a51"
+      }
+    },
+    {
+      "id": "vodafone_hu-72.0-g5",
+      "operator": "Vodafone_hu",
+      "bundle_id": "com.apple.Vodafone_hu",
+      "version": "72.0",
+      "kind": "donor",
+      "groups": [
+        "G5"
+      ],
+      "note": "Профиль оператора из Венгрии.",
+      "source": {
+        "type": "files",
+        "repo": "VCTGomes/ios-carrier-bundle",
+        "commit": "b4566ef306ea93ccdd3668970ea85944a9af8b79",
+        "bundle_name": "Vodafone_hu.bundle",
+        "files": [
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/Info.plist",
+            "size": 405,
+            "sha256": "be81131b398e7208c4cdb9e9568ec04a9b7604da4c129cb599ba9dad39e70b4a"
+          },
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/carrier.plist",
+            "size": 6546,
+            "sha256": "cf1159e832fc7c5d38c59b2a6b4cd034b39ff5a98bdf0b496b5ea1ef5a4a5be0"
+          },
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/overrides_V53_V54_V57.der.pri",
+            "size": 4354,
+            "sha256": "f1a083425fe30ac36d61e9d57484d7aaaae5b99a9ea4186e155230f1d6f7c590"
+          },
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/overrides_V53_V54_V57.plist",
+            "size": 299,
+            "sha256": "58c6bf5732602a9cd5c4d414f08ee18f3a39b63de90ddfd98a36dae8ad8a3d4c"
+          },
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/signatures/common.plist",
+            "size": 447,
+            "sha256": "ce42f6ea01358a37c8feeeb7860aca9c9502de7be8c5267824993f693a1c8210"
+          },
+          {
+            "path": "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle/signatures/overrides_V53_V54_V57.plist",
+            "size": 893,
+            "sha256": "437a34a6f42db0ae00044975b725b263c4b8968690ec0178ff32dbbc5cbde019"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vodafone_hu-72.0-g6",
+      "operator": "Vodafone_hu",
+      "bundle_id": "com.apple.Vodafone_hu",
+      "version": "72.0",
+      "kind": "donor",
+      "groups": [
+        "G6"
+      ],
+      "note": "Профиль оператора из Венгрии.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "56497ccb845ad1b06a26b9290f82741d058fc650",
+        "bundle_name": "Vodafone_hu.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/Info.plist",
+            "size": 405,
+            "sha256": "be81131b398e7208c4cdb9e9568ec04a9b7604da4c129cb599ba9dad39e70b4a"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/carrier.plist",
+            "size": 6546,
+            "sha256": "cf1159e832fc7c5d38c59b2a6b4cd034b39ff5a98bdf0b496b5ea1ef5a4a5be0"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_D23.der.pri",
+            "size": 144,
+            "sha256": "a80c7bbfd099243e56a3ec572d41699e36c7bfbc129892bb5958e0d5fd8acf77"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_D23.plist",
+            "size": 289,
+            "sha256": "db5ceeb22b676841259508c286ddb95966d5ee19a10f87ff873d9f666f35ff2c"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/signatures/common.plist",
+            "size": 447,
+            "sha256": "ce42f6ea01358a37c8feeeb7860aca9c9502de7be8c5267824993f693a1c8210"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/signatures/overrides_D23.plist",
+            "size": 876,
+            "sha256": "f6c2fe8f74d471dacbde0436c21fb84800377cff185f7c12e1179b7fc604a5f9"
+          }
+        ]
       }
     },
     {
@@ -114,7 +210,7 @@
         "G8",
         "G9"
       ],
-      "note": "Из публичного дампа iOS 27.2. Для российских SIM не проверялся.",
+      "note": "Профиль оператора из Венгрии.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -179,7 +275,7 @@
         "G8",
         "G9"
       ],
-      "note": "Экспериментальный. Из публичного дампа iOS 27.2.",
+      "note": "Профиль оператора из Румынии. Экспериментальный.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -244,7 +340,7 @@
         "G8",
         "G9"
       ],
-      "note": "Экспериментальный. Из публичного дампа iOS 27.2.",
+      "note": "Профиль оператора из Украины. Экспериментальный.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -306,7 +402,7 @@
         "G8",
         "G9"
       ],
-      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "note": "Стандартный профиль оператора.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -353,7 +449,7 @@
         "G8",
         "G9"
       ],
-      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "note": "Стандартный профиль оператора.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -400,7 +496,7 @@
         "G8",
         "G9"
       ],
-      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "note": "Стандартный профиль оператора.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
@@ -447,7 +543,7 @@
         "G8",
         "G9"
       ],
-      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "note": "Стандартный профиль оператора.",
       "source": {
         "type": "files",
         "repo": "dwilliamsuk/ios-carrier-bundles",
