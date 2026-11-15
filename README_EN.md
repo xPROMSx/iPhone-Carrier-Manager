@@ -104,5 +104,3 @@ Donations are optional and do not affect access to the source code or future fea
 ## 📄 License
 
 [GNU GPL v3 or later](LICENSE) (GPL-3.0-or-later). Third-party notices: [NOTICE](NOTICE).
-
-[For developers: technical notes (Russian)](docs/TECHNICAL.md).
