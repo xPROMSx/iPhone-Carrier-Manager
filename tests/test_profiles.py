@@ -20,10 +20,13 @@ def test_valid_database(profile_data, files_data):
             profiles.get_profile(database, "missing")
 
 
-def test_packaged_empty_database():
+def test_packaged_database():
+    # Боевая база проходит ту же проверку схемы, что и выдуманная.
     database = profiles.load_database()
-    assert database.groups == {}
-    assert database.profiles == ()
+    assert database.groups
+    assert database.profiles
+    used = {group for item in database.profiles for group in item.groups}
+    assert used == set(database.groups)
 
 
 # Каждый элемент задаёт отдельное нарушение схемы, без изменения исходной fixture.

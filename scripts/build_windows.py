@@ -42,7 +42,7 @@ def smoke(executable):
             )
             if result.returncode != code or (code == 3 and b"UNVERIFIED" not in result.stdout):
                 raise RuntimeError("Offline smoke EXE не пройден.")
-            if args[0] == "profiles" and "База профилей пуста" not in result.stdout.decode("utf-8"):
+            if args[0] == "profiles" and "Группа:" not in result.stdout.decode("utf-8"):
                 raise RuntimeError("База профилей отсутствует в EXE или smoke не пройден.")
 
 
