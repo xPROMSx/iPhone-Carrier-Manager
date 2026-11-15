@@ -30,7 +30,10 @@ def smoke(executable):
         environment.pop("PYTHONPATH", None)
         environment["PYTHONUTF8"] = "1"
         environment["ICM_IMPORT_SMOKE"] = "1"
-        for args, code in ((["--help"], 0), (["--version"], 0), (["check", str(source)], 3)):
+        for args, code in (
+            (["--help"], 0), (["--version"], 0), (["check", str(source)], 3),
+            (["profiles", "--product", "iPhone18,1"], 0),
+        ):
             result = subprocess.run(
                 [str(executable), *args],
                 cwd=folder,
@@ -39,6 +42,8 @@ def smoke(executable):
             )
             if result.returncode != code or (code == 3 and b"UNVERIFIED" not in result.stdout):
                 raise RuntimeError("Offline smoke EXE не пройден.")
+            if args[0] == "profiles" and "База профилей пуста" not in result.stdout.decode("utf-8"):
+                raise RuntimeError("База профилей отсутствует в EXE или smoke не пройден.")
 
 
 def licenses(folder):
@@ -74,6 +79,7 @@ def main():
             "--clean",
             "--onedir",
             "--console",
+            "--collect-data=iphone_carrier_manager",
             "--runtime-hook",
             str(ROOT / "scripts" / "import_services.py"),
             "--hidden-import=pymobiledevice3.services.installation_proxy",

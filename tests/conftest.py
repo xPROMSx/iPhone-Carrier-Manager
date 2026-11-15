@@ -71,3 +71,93 @@ def source(tmp_path, zip_bytes):
     path = tmp_path / "synthetic.ipcc"
     path.write_bytes(zip_bytes())
     return path
+
+
+@pytest.fixture
+def profile_data(zip_bytes):
+    import hashlib
+
+    payload = zip_bytes()
+    return {
+        "schema": 1,
+        "groups": {"synthetic": {
+            "label": "Выдуманная группа",
+            "product_types": ["iPhone999,1", "iPhone999,2"],
+            "tested": ["iPhone999,1"],
+        }},
+        "profiles": [{
+            "id": "synthetic-stock", "operator": "Выдуманный оператор",
+            "bundle_id": "example.target", "version": "2.0", "kind": "stock",
+            "groups": ["synthetic"], "note": "Выдуманное примечание",
+            "source": {
+                "type": "ipcc", "url": "https://updates.cdn-apple.com/synthetic.ipcc",
+                "size": len(payload), "sha256": hashlib.sha256(payload).hexdigest(),
+            },
+        }],
+    }
+
+
+@pytest.fixture
+def files_data(profile_data):
+    import hashlib
+
+    content = {
+        "Info.plist": plistlib.dumps({"CFBundleIdentifier": "example.target",
+                                      "CFBundleVersion": "2.0"}),
+        "carrier.plist": plistlib.dumps({}),
+        "nested/deeper/test.bin": b"synthetic bytes",
+    }
+    profile_data["profiles"][0]["source"] = {
+        "type": "files", "repo": "synthetic-owner/synthetic-repo", "commit": "a" * 40,
+        "bundle_name": "Synthetic.bundle", "files": [
+            {"path": "Carrier Bundles/Synthetic.bundle/" + name, "size": len(data),
+             "sha256": hashlib.sha256(data).hexdigest()}
+            for name, data in content.items()
+        ],
+    }
+    return profile_data, content
+
+
+@pytest.fixture
+def network(monkeypatch):
+    """Подстановка транспорта: тесты не выполняют реальные сетевые операции."""
+    from types import SimpleNamespace
+
+    from iphone_carrier_manager import fetch
+
+    state = SimpleNamespace(now=0, urls=[], timeouts=[], bodies={}, step=0, block=65536,
+                            error=None, closed=0, opens=0)
+    monkeypatch.setattr(fetch.time, "monotonic", lambda: state.now)
+
+    class Response:
+        def __init__(self, data):
+            self.data = data
+            self.position = 0
+            self.download_socket = SimpleNamespace(settimeout=state.timeouts.append)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            state.closed += 1
+
+        def isclosed(self):
+            return False
+
+        def read1(self, size):
+            state.now += state.step
+            size = min(size, state.block)
+            result = self.data[self.position:self.position + size]
+            self.position += len(result)
+            return result
+
+    def open_url(url, timeout):
+        state.opens += 1
+        state.urls.append(url)
+        state.timeouts.append(timeout)
+        if state.error:
+            raise state.error
+        return Response(state.bodies[url])
+
+    monkeypatch.setattr(fetch, "_opener", lambda budget: SimpleNamespace(open=open_url))
+    return state
