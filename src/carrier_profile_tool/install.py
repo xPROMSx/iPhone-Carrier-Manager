@@ -302,6 +302,10 @@ async def run_install(source, selector, previous, cache):
 async def install_file(path, selector, previous_path):
     source = check_file(path)
     previous = check_file(previous_path)
+    return await install_packages(source, previous, selector)
+
+
+async def install_packages(source, previous, selector):
     disabled = logging.root.manager.disable
     logging.disable(logging.CRITICAL)
     result = None

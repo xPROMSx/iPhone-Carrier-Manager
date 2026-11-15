@@ -39,7 +39,8 @@ def parser():
         prog="carrier-profile-tool", description="Чтение, подготовка и установка IPCC."
     )
     result.add_argument("--version", action="version", version=__version__, help="Показать версию")
-    commands = result.add_subparsers(dest="command", required=True)
+    commands = result.add_subparsers(dest="command")
+    commands.add_parser("menu", help="Открыть пошаговое меню")
     commands.add_parser("info", help="Прочитать ранее сопряжённый iPhone через USB")
     check = commands.add_parser("check", help="Проверить локальный IPCC или каталог")
     check.add_argument("path", help="IPCC или каталог")
@@ -186,6 +187,10 @@ def main(argv=None):
             reconfigure(encoding="utf-8")
     args = parser().parse_args(argv)
     try:
+        if args.command in (None, "menu"):
+            from carrier_profile_tool.menu import run_menu
+
+            return asyncio.run(run_menu())
         if args.command == "profiles":
             return asyncio.run(profiles_command(args))
         if args.command == "fetch":
