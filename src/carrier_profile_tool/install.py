@@ -123,16 +123,37 @@ async def wait_for_detach(serial):
     return False
 
 
-async def wait_for_readback(serial, cache):
+def same_lines(before, after):
+    """Снимок полный и содержит ровно те же линии, что были до установки."""
+    if after.line_problem or not after.lines:
+        return False
+    keys = lambda snapshot: {  # noqa: E731
+        (line.slot, line.integrated_circuit_card_identity) for line in snapshot.lines
+    }
+    return len(keys(after)) == len(after.lines) and keys(before) == keys(after)
+
+
+async def wait_for_readback(serial, cache, before=None):
+    """Читает телефон после перезагрузки, пока список линий не станет полным.
+
+    Сразу после включения iPhone может отдать неполный список линий: SIM ещё не
+    зарегистрировалась. Такое чтение не считается результатом, чтение только
+    повторяется (на телефон ничего не пишется). Если до конца времени полного
+    списка так и нет, ошибка говорит об этом прямо.
+    """
     from pymobiledevice3.exceptions import PasscodeRequiredError, PasswordRequiredError
 
     deadline = monotonic() + timeouts.READBACK
     next_notice = 0
+    incomplete = False
     while monotonic() < deadline:
         try:
-            return await asyncio.wait_for(
+            snapshot = await asyncio.wait_for(
                 read_same(serial, cache), min(timeouts.READ, deadline - monotonic())
             )
+            if before is None or same_lines(before, snapshot):
+                return snapshot
+            incomplete = True
         except (PasscodeRequiredError, PasswordRequiredError):
             if monotonic() >= next_notice:
                 print("разблокируйте iPhone")
@@ -140,6 +161,11 @@ async def wait_for_readback(serial, cache):
         except Exception:
             pass
         await pause(min(timeouts.POLL, max(0, deadline - monotonic())))
+    if incomplete:
+        raise device.DeviceError(
+            "состав линий изменился или телефон не отдал полный список за "
+            f"{timeouts.READBACK} с"
+        )
     raise device.DeviceError("телефон не вернулся или не удалось прочитать его за 300 с")
 
 
@@ -365,9 +391,9 @@ async def run_install(source, selector, previous, cache, plain=False, tested=Fal
             detached = False
         reasons = [] if detached else ["перезагрузка не обнаружена"]
         try:
-            after = await wait_for_readback(serial, cache)
-        except device.DeviceError:
-            reasons.append("телефон не вернулся или не удалось прочитать его за 300 с")
+            after = await wait_for_readback(serial, cache, before)
+        except device.DeviceError as error:
+            reasons.append(str(error))
         else:
             if plain:
                 readback.append(after)
