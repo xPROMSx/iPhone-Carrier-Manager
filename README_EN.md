@@ -10,7 +10,7 @@ Connect your iPhone over USB, select a SIM or eSIM line, and choose a carrier pr
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue)](LICENSE)
 [![Releases](https://img.shields.io/badge/Download-GitHub%20Releases-2ea44f)](https://github.com/xPROMSx/iPhone-Carrier-Manager/releases)
 
-[🇷🇺 Русский](README.md) · [📦 Releases](https://github.com/xPROMSx/iPhone-Carrier-Manager/releases) · [🐛 Issues](https://github.com/xPROMSx/iPhone-Carrier-Manager/issues) · [❤️ Support](#-support-development)
+[🇷🇺 Русский](README.md) · [📦 Releases](https://github.com/xPROMSx/iPhone-Carrier-Manager/releases) · [🐛 Issues](https://github.com/xPROMSx/iPhone-Carrier-Manager/issues) · [❤️ Support](docs/SUPPORT.en.md)
 
 ### [📥 Download for Windows](https://github.com/xPROMSx/iPhone-Carrier-Manager/releases)
 
@@ -33,10 +33,10 @@ The catalog includes **MTS Russia, MegaFon, Tele2, Beeline, Vodafone Hungary, Vo
 1. **Connect your iPhone.** The app reads its model, iOS version, SIM/eSIM lines, and current carrier profiles.
 2. **Choose a line and profile.** Pick a catalog profile or provide your own file. Catalog packages are downloaded automatically and checked against their expected hashes.
 3. **Review the change.** The app shows which profile will be installed on which line. You must type **`INSTALL`** before it writes anything to the phone.
-4. **Wait for verification.** The app installs the profile on the selected line, restarts the iPhone, and reads its settings again. Other lines are not installation targets.
+4. **Wait for verification.** The app installs the profile on the selected line, restarts the iPhone, and reads its settings again. The app doesn't touch your other lines.
 
 > [!IMPORTANT]
-> Installing a profile changes the carrier settings of the **selected line** and restarts the entire iPhone. Check your selection before confirming. Installing the previous profile again may not return every setting to its original state.
+> Installing a profile changes the carrier settings of the **selected line** and restarts the entire iPhone. Check your selection before confirming. Installing the previous profile again may not bring back every setting.
 
 ## 🚀 Quick start
 
@@ -45,7 +45,7 @@ You'll need **64-bit Windows 11**, a USB cable, internet access, and **Apple Dev
 1. Visit the [**download page**](https://github.com/xPROMSx/iPhone-Carrier-Manager/releases). Once a release is available, download the Windows archive.
 2. Extract the **entire archive** into a folder and double-click the application. You don't need to install Python.
 3. Connect and unlock your iPhone. Tap **Trust** if the phone asks whether to trust this computer.
-4. Follow the menu prompts. You can inspect your phone without installing a profile.
+4. Follow the menu prompts. You can exit without changes at any step before typing `INSTALL`.
 
 Administrator privileges and jailbreaking are not required. The app does not install drivers.
 
@@ -62,7 +62,7 @@ If a package won't download, check your internet connection, VPN, or proxy.
 
 - Installing a profile restarts the entire iPhone.
 - The selected line's carrier profile changes. Mobile network behavior depends on the model, carrier, and iOS version.
-- Going back means **installing the previous profile again**. This may not restore every setting to its former state.
+- Going back means **installing the previous profile again**. This may not bring back every setting.
 - Testing has covered a limited selection of models, not every phone. You use the app at your own risk.
 - This is an independent project and is not affiliated with Apple. Apple and iPhone are trademarks of Apple Inc.
 
@@ -84,7 +84,7 @@ Select the intended line in the menu. The app shows your selection again before 
 Yes. You can choose a local file instead of a catalog entry.
 
 **How do I go back to my previous profile?**  
-Install the previously prepared package again. This is a separate, confirmed operation, not a complete reset.
+Install the previously prepared package again. This is a separate action that requires confirmation.
 
 **Will this enable 5G or Wi-Fi Calling?**  
 The app changes carrier profiles, but it can't promise those features. Availability depends on your iPhone, carrier, network, and iOS.
