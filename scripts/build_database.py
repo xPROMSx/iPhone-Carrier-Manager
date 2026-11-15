@@ -3,7 +3,9 @@
 Что делает:
 1. Берёт пакет Vodafone_hu 69.1 с серверов Apple (файл .ipcc, скачанный заранее
    командой `fetch` или вручную по адресу из APPLE_URL).
-2. Берёт профили из локальной копии публичного дампа на закреплённом коммите.
+2. Берёт профили из локальных копий публичных репозиториев на закреплённых коммитах:
+   дамп (DUMP_COMMIT), снимок Vodafone_hu 72.0 для платы D23 (DUMP_OLD_COMMIT) и
+   снимок Vodafone_hu 72.0 для плат V53_V54_V57 (VCT_COMMIT).
 3. Проверяет подписи .der.pri3 каждого пакета (ECDSA P-384, SHA-384) закреплённым
    открытым ключом. Если хоть одна подпись не сошлась, сборка останавливается.
 4. Записывает profiles.json (схема 1) в указанный файл.
@@ -16,7 +18,9 @@
 
 Пример:
     python scripts/build_database.py --apple-ipcc Vodafone_hu_69.1.ipcc \\
-        --dump-dir путь/к/ios-carrier-bundles \\
+        --dump-dir путь/к/копии/дампа/на/DUMP_COMMIT \\
+        --dump-old-dir путь/к/копии/дампа/на/DUMP_OLD_COMMIT \\
+        --vct-dir путь/к/копии/второго/репозитория/на/VCT_COMMIT \\
         --out src/carrier_profile_tool/profiles.json
 """
 import argparse
@@ -24,6 +28,7 @@ import hashlib
 import io
 import json
 import plistlib
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -49,6 +54,13 @@ APPLE_URL = (
 APPLE_BUNDLE = "Vodafone_hu"
 DUMP_REPO = "dwilliamsuk/ios-carrier-bundles"
 DUMP_COMMIT = "a434a25c4be1f4319569ccc80f9e70c5be6072aa"
+# Тот же репозиторий, снимок с Vodafone_hu 72.0 для платы D23 (iPhone Air).
+DUMP_OLD_COMMIT = "56497ccb845ad1b06a26b9290f82741d058fc650"
+# Vodafone_hu 72.0 для плат V53_V54_V57 (iPhone 17, 17 Pro, 17 Pro Max), оригинальные
+# бинарные plist из прошивки iOS 27.0 (24A437).
+VCT_REPO = "VCTGomes/ios-carrier-bundle"
+VCT_COMMIT = "b4566ef306ea93ccdd3668970ea85944a9af8b79"
+VCT_BUNDLE_PATH = "carrier-bundles/27.0-24A437.V53_V54_V57OS/Vodafone_hu.bundle"
 
 GROUPS = {
     "G1": ("iPhone 14, 14 Plus, 14 Pro, 14 Pro Max",
@@ -66,9 +78,20 @@ GROUPS = {
            ["iPhone19,2", "iPhone19,4", "iPhone19,7"]),
     "G9": ("iPhone 18 Pro Max (US)", ["iPhone19,3"]),
 }
-APPLE_GROUPS = ["G1", "G2", "G3", "G4", "G5", "G6", "G7"]
+APPLE_GROUPS = ["G1", "G2", "G3", "G4", "G7"]
 DUMP_DONORS = ["Vodafone_hu", "Vodafone_ro", "MTS_ua"]
 DUMP_STOCK = ["MTS_ru", "MegaFon_ru", "Tele2_ru", "VimpelCom_ru"]
+
+# Короткие пояснения для меню, простыми словами.
+NOTES = {
+    "Vodafone_hu": "Профиль оператора из Венгрии.",
+    "Vodafone_ro": "Профиль оператора из Румынии. Экспериментальный.",
+    "MTS_ua": "Профиль оператора из Украины. Экспериментальный.",
+    "MTS_ru": "Стандартный профиль оператора.",
+    "MegaFon_ru": "Стандартный профиль оператора.",
+    "Tele2_ru": "Стандартный профиль оператора.",
+    "VimpelCom_ru": "Стандартный профиль оператора.",
+}
 
 
 def digest(data: bytes, name: str = "sha256") -> str:
@@ -122,7 +145,7 @@ def apple_profile(key, ipcc: Path) -> dict:
         "version": version,
         "kind": "donor",
         "groups": APPLE_GROUPS,
-        "note": "Пакет с серверов Apple (iOS 26.4+). Для российских SIM не проверялся.",
+        "note": NOTES["Vodafone_hu"],
         "source": {
             "type": "ipcc",
             "url": APPLE_URL,
@@ -134,8 +157,22 @@ def apple_profile(key, ipcc: Path) -> dict:
     }
 
 
-def dump_profile(key, dump_dir: Path, name: str, kind: str, groups: list[str], note: str) -> dict:
-    bundle = dump_dir / "Carrier Bundles" / f"{name}.bundle"
+def check_commit(folder: Path, commit: str):
+    """Если папка - копия git-репозитория, проверяет, что она стоит на нужном коммите."""
+    if not (folder / ".git").exists():
+        return
+    head = subprocess.run(
+        ["git", "-C", str(folder), "rev-parse", "HEAD"], capture_output=True, text=True
+    ).stdout.strip()
+    if head != commit:
+        raise SystemExit(f"Папка {folder} стоит на коммите {head}, нужен {commit}.")
+
+
+def files_profile(key, bundle: Path, repo: str, commit: str, repo_path: str, kind: str,
+                  groups: list[str], note: str, profile_id: str | None = None,
+                  require_signature: bool = False) -> dict:
+    """Профиль из файлов папки bundle; repo_path - путь этой папки внутри репозитория."""
+    name = bundle.name.removesuffix(".bundle")
     entries, files = [], {}
     for path in sorted(bundle.rglob("*")):
         if path.is_file():
@@ -143,7 +180,7 @@ def dump_profile(key, dump_dir: Path, name: str, kind: str, groups: list[str], n
             data = path.read_bytes()
             files[rel] = data
             entries.append({
-                "path": f"Carrier Bundles/{name}.bundle/{rel}",
+                "path": f"{repo_path}/{rel}",
                 "size": len(data),
                 "sha256": digest(data),
             })
@@ -151,8 +188,10 @@ def dump_profile(key, dump_dir: Path, name: str, kind: str, groups: list[str], n
     info = plistlib.loads(files["Info.plist"])
     version = info["CFBundleVersion"]
     print(f"{name} {version}: подписей проверено {checked}")
+    if require_signature and checked == 0:
+        raise SystemExit(f"{name} {version}: нет ни одной проверенной подписи.")
     return {
-        "id": f"{name.lower()}-{version}",
+        "id": profile_id or f"{name.lower()}-{version}",
         "operator": name,
         "bundle_id": info["CFBundleIdentifier"],
         "version": version,
@@ -161,12 +200,19 @@ def dump_profile(key, dump_dir: Path, name: str, kind: str, groups: list[str], n
         "note": note,
         "source": {
             "type": "files",
-            "repo": DUMP_REPO,
-            "commit": DUMP_COMMIT,
+            "repo": repo,
+            "commit": commit,
             "bundle_name": f"{name}.bundle",
             "files": entries,
         },
     }
+
+
+def dump_profile(key, dump_dir: Path, name: str, kind: str, groups: list[str], note: str) -> dict:
+    return files_profile(
+        key, dump_dir / "Carrier Bundles" / f"{name}.bundle", DUMP_REPO, DUMP_COMMIT,
+        f"Carrier Bundles/{name}.bundle", kind, groups, note,
+    )
 
 
 def main(argv=None) -> int:
@@ -174,22 +220,34 @@ def main(argv=None) -> int:
     parser.add_argument("--apple-ipcc", type=Path, required=True,
                         help="файл Vodafone_hu .ipcc с серверов Apple")
     parser.add_argument("--dump-dir", type=Path, required=True,
-                        help="папка с копией дампа на закреплённом коммите")
+                        help="папка с копией дампа на коммите DUMP_COMMIT")
+    parser.add_argument("--dump-old-dir", type=Path, required=True,
+                        help="папка с копией того же дампа на коммите DUMP_OLD_COMMIT")
+    parser.add_argument("--vct-dir", type=Path, required=True,
+                        help="папка с копией второго репозитория на коммите VCT_COMMIT")
     parser.add_argument("--out", type=Path, required=True, help="куда записать profiles.json")
     args = parser.parse_args(argv)
 
+    check_commit(args.dump_dir, DUMP_COMMIT)
+    check_commit(args.dump_old_dir, DUMP_OLD_COMMIT)
+    check_commit(args.vct_dir, VCT_COMMIT)
     key = load_key()
     all_groups = list(GROUPS)
     profiles = [apple_profile(key, args.apple_ipcc)]
+    profiles.append(files_profile(
+        key, args.vct_dir / VCT_BUNDLE_PATH, VCT_REPO, VCT_COMMIT, VCT_BUNDLE_PATH, "donor",
+        ["G5"], NOTES["Vodafone_hu"], "vodafone_hu-72.0-g5", require_signature=True,
+    ))
+    profiles.append(files_profile(
+        key, args.dump_old_dir / "Carrier Bundles" / "Vodafone_hu.bundle", DUMP_REPO,
+        DUMP_OLD_COMMIT, "Carrier Bundles/Vodafone_hu.bundle", "donor",
+        ["G6"], NOTES["Vodafone_hu"], "vodafone_hu-72.0-g6", require_signature=True,
+    ))
     new_groups = ["G8", "G9"]
     for name in DUMP_DONORS:
-        note = ("Из публичного дампа iOS 27.2. Для российских SIM не проверялся."
-                if name == "Vodafone_hu" else "Экспериментальный. Из публичного дампа iOS 27.2.")
-        profiles.append(dump_profile(key, args.dump_dir, name, "donor", new_groups, note))
+        profiles.append(dump_profile(key, args.dump_dir, name, "donor", new_groups, NOTES[name]))
     for name in DUMP_STOCK:
-        profiles.append(dump_profile(
-            key, args.dump_dir, name, "stock", all_groups,
-            "Штатный профиль оператора из публичного дампа iOS 27.2."))
+        profiles.append(dump_profile(key, args.dump_dir, name, "stock", all_groups, NOTES[name]))
 
     database = {
         "schema": 1,
