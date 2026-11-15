@@ -1,1 +1,481 @@
-{"schema": 1, "groups": {}, "profiles": []}
+{
+  "schema": 1,
+  "groups": {
+    "G1": {
+      "label": "iPhone 14, 14 Plus, 14 Pro, 14 Pro Max",
+      "product_types": [
+        "iPhone14,7",
+        "iPhone14,8",
+        "iPhone15,2",
+        "iPhone15,3"
+      ],
+      "tested": []
+    },
+    "G2": {
+      "label": "iPhone 15, 15 Plus, 15 Pro, 15 Pro Max",
+      "product_types": [
+        "iPhone15,4",
+        "iPhone15,5",
+        "iPhone16,1",
+        "iPhone16,2"
+      ],
+      "tested": []
+    },
+    "G3": {
+      "label": "iPhone 16, 16 Plus, 16 Pro, 16 Pro Max",
+      "product_types": [
+        "iPhone17,1",
+        "iPhone17,2",
+        "iPhone17,3",
+        "iPhone17,4"
+      ],
+      "tested": []
+    },
+    "G4": {
+      "label": "iPhone 16e",
+      "product_types": [
+        "iPhone17,5"
+      ],
+      "tested": []
+    },
+    "G5": {
+      "label": "iPhone 17, 17 Pro, 17 Pro Max",
+      "product_types": [
+        "iPhone18,1",
+        "iPhone18,2",
+        "iPhone18,3"
+      ],
+      "tested": []
+    },
+    "G6": {
+      "label": "iPhone Air",
+      "product_types": [
+        "iPhone18,4"
+      ],
+      "tested": []
+    },
+    "G7": {
+      "label": "iPhone 17e",
+      "product_types": [
+        "iPhone18,5"
+      ],
+      "tested": []
+    },
+    "G8": {
+      "label": "iPhone 18 Pro, 18 Pro Max (Global), Duo",
+      "product_types": [
+        "iPhone19,2",
+        "iPhone19,4",
+        "iPhone19,7"
+      ],
+      "tested": []
+    },
+    "G9": {
+      "label": "iPhone 18 Pro Max (US)",
+      "product_types": [
+        "iPhone19,3"
+      ],
+      "tested": []
+    }
+  },
+  "profiles": [
+    {
+      "id": "vodafone_hu-69.1",
+      "operator": "Vodafone_hu",
+      "bundle_id": "com.apple.Vodafone_hu",
+      "version": "69.1",
+      "kind": "donor",
+      "groups": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7"
+      ],
+      "note": "Пакет с серверов Apple (iOS 26.4+). Для российских SIM не проверялся.",
+      "source": {
+        "type": "ipcc",
+        "url": "https://updates.cdn-apple.com/20260324/carrierbundles/032-21361/97A3F062-376F-444C-AFCA-72ABB6109E84/Vodafone_hu_iPhone.ipcc",
+        "size": 81576,
+        "sha256": "a385579e811cbcb53e801c98045010736a0e222e193e0f074c2224d951af5b87",
+        "sha1": "be805eec750b8144caeeb6be2dccf545d4d1004f",
+        "sha384": "87902333c327079364f17ea7ecea5e8e4e14681e7c16d86b07a62d1e4b5f3b05930267f1366d42449478c79c26fc6a51"
+      }
+    },
+    {
+      "id": "vodafone_hu-73.0",
+      "operator": "Vodafone_hu",
+      "bundle_id": "com.apple.Vodafone_hu",
+      "version": "73.0",
+      "kind": "donor",
+      "groups": [
+        "G8",
+        "G9"
+      ],
+      "note": "Из публичного дампа iOS 27.2. Для российских SIM не проверялся.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "Vodafone_hu.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/Info.plist",
+            "size": 405,
+            "sha256": "2b6bfbf910a088a29c2665717c756268ffaa186342a43bc0f11933b7253d9f5a"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/carrier.plist",
+            "size": 6546,
+            "sha256": "cf1159e832fc7c5d38c59b2a6b4cd034b39ff5a98bdf0b496b5ea1ef5a4a5be0"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_V63_V64s_V68.der.pri",
+            "size": 144,
+            "sha256": "a80c7bbfd099243e56a3ec572d41699e36c7bfbc129892bb5958e0d5fd8acf77"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_V63_V64s_V68.plist",
+            "size": 298,
+            "sha256": "c54a33f0528b56876f64fe1862c365daa0e0b375dcf81bd975f906bc04223dd3"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_V64.der.pri",
+            "size": 4653,
+            "sha256": "72cd9526223ebd1b6fe4caff9d7d8f4d1b7826ac1585d49fd90e46a0e86ad5fd"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/overrides_V64.plist",
+            "size": 291,
+            "sha256": "ec75c212a693aeb5b6ed557d7d4e6c310989bed674af88d4acbc24b380d5697d"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/signatures/common.plist",
+            "size": 446,
+            "sha256": "b08bf08b7cce8d359e61f13ce659815d131b465bc8af174b4194796cb469edba"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/signatures/overrides_V63_V64s_V68.plist",
+            "size": 893,
+            "sha256": "653d6e8356c4e7385293cb08e727347afbb17913ebd0dddeeb8d9629cbea2b55"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_hu.bundle/signatures/overrides_V64.plist",
+            "size": 876,
+            "sha256": "c92c48d1bc77e3665b7cd1f1f9a9eb52a021bfe5d89a6c688b88706d2da9a5a1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vodafone_ro-73.0",
+      "operator": "Vodafone_ro",
+      "bundle_id": "com.apple.Vodafone_ro",
+      "version": "73.0",
+      "kind": "donor",
+      "groups": [
+        "G8",
+        "G9"
+      ],
+      "note": "Экспериментальный. Из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "Vodafone_ro.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/Info.plist",
+            "size": 405,
+            "sha256": "d1fc0dae7ff102a83f178f5b0464a98ba256adab1069b03bfcd2c2b8f5f81628"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/carrier.plist",
+            "size": 6294,
+            "sha256": "97adf7b87e3624ef839dbbf63c18778c3ef97b475479be42f023b5391705f374"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/overrides_V63_V64s_V68.der.pri",
+            "size": 144,
+            "sha256": "5f8d303b2c4c2aa42a0d4a476499fd6293ef439b5697642e7c47904d37d1affd"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/overrides_V63_V64s_V68.plist",
+            "size": 275,
+            "sha256": "bae203bfd2fc5d1236e7929706ab94af28e58e9b3e116eda6dfb6bf0ce831167"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/overrides_V64.der.pri",
+            "size": 4521,
+            "sha256": "cfdf65f634a901980ce85cf84737242a41c898ecdb46f092a4cd571acff2a7d7"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/overrides_V64.plist",
+            "size": 268,
+            "sha256": "dd4184c4086c7703fa0e11c47fd7ea7539fa5d7eeeb786fe6cdf936374fd85c1"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/signatures/common.plist",
+            "size": 448,
+            "sha256": "10189020526353dfe13a3055e6f23d3aa02e4841da3548fc6daf6f3f2e173769"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/signatures/overrides_V63_V64s_V68.plist",
+            "size": 892,
+            "sha256": "5d88555cf8c31aca4dcbb9f1e36a058716ede9225b0493559a3c17ec02a577a2"
+          },
+          {
+            "path": "Carrier Bundles/Vodafone_ro.bundle/signatures/overrides_V64.plist",
+            "size": 875,
+            "sha256": "46411988047942970b9352d9044d0de62a539abcbfcd2596e1111be1152ca658"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mts_ua-73.0",
+      "operator": "MTS_ua",
+      "bundle_id": "com.apple.MTS_ua",
+      "version": "73.0",
+      "kind": "donor",
+      "groups": [
+        "G8",
+        "G9"
+      ],
+      "note": "Экспериментальный. Из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "MTS_ua.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/Info.plist",
+            "size": 421,
+            "sha256": "a35b8f449737f272c318e46f2496fbac795ac985755b29627c8d3ffbf9bf7e3e"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/carrier.plist",
+            "size": 1566,
+            "sha256": "930c644b827631976c082866f7e000c60d41ff594dc6c3d25511b01f379accb8"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/overrides_V63_V64s_V68.plist",
+            "size": 68,
+            "sha256": "31b24ea429742149c739f60622853cc1afc352c9d9a858fa94760db42bde538e"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/overrides_V64.plist",
+            "size": 68,
+            "sha256": "31b24ea429742149c739f60622853cc1afc352c9d9a858fa94760db42bde538e"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/signatures/common.plist",
+            "size": 446,
+            "sha256": "fabe2b9194f3c865480dc5e5895d2b1a34e22a2d2b21ffaa09578d986afeacac"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/signatures/overrides_V63_V64s_V68.plist",
+            "size": 447,
+            "sha256": "2196ac8958277ded095b0a87d9724ae5f3f198706f99e977909ff687e4515c46"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ua.bundle/signatures/overrides_V64.plist",
+            "size": 447,
+            "sha256": "0ef81ea98ec3a78b209fc5ecfd612d80d58b1661b2e4ade4f52ca9d0a87fbce7"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mts_ru-73.0",
+      "operator": "MTS_ru",
+      "bundle_id": "com.apple.MTS_ru",
+      "version": "73.0",
+      "kind": "stock",
+      "groups": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7",
+        "G8",
+        "G9"
+      ],
+      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "MTS_ru.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/MTS_ru.bundle/Info.plist",
+            "size": 395,
+            "sha256": "26c718da9ad28410ee862fb2f8917cf2ff95e5dc32901612037142a3388d367e"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ru.bundle/carrier.plist",
+            "size": 5991,
+            "sha256": "af504975296cfe5ae985311d8f52aacaecda3f8d8985e14eeb9f6cfe0f342956"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ru.bundle/signatures/common.plist",
+            "size": 446,
+            "sha256": "35adfd89b95d016d2afeedb990d69fa8e50e1ba7591cc909344b4eb02821e9dd"
+          },
+          {
+            "path": "Carrier Bundles/MTS_ru.bundle/supported_devices.plist",
+            "size": 161,
+            "sha256": "e979407d2b3e0615999efa27646b8169a46f005468c5b804c5c0fa3ca1771b4a"
+          }
+        ]
+      }
+    },
+    {
+      "id": "megafon_ru-73.0",
+      "operator": "MegaFon_ru",
+      "bundle_id": "com.apple.MegaFon_ru",
+      "version": "73.0",
+      "kind": "stock",
+      "groups": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7",
+        "G8",
+        "G9"
+      ],
+      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "MegaFon_ru.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/MegaFon_ru.bundle/Info.plist",
+            "size": 403,
+            "sha256": "442311ea759ae7fac96e5479f6ed111db035f3a42419c9a01df136f211b2a1c4"
+          },
+          {
+            "path": "Carrier Bundles/MegaFon_ru.bundle/carrier.plist",
+            "size": 5720,
+            "sha256": "5753051bfb03900dcaae8110e886ba4a9d63b5940fd022d5c8d3ed6f80479dd1"
+          },
+          {
+            "path": "Carrier Bundles/MegaFon_ru.bundle/signatures/common.plist",
+            "size": 447,
+            "sha256": "e78f9791cf74636149ff8543eccb725120b85fec532e12d7ca97276b6fa36f21"
+          },
+          {
+            "path": "Carrier Bundles/MegaFon_ru.bundle/supported_devices.plist",
+            "size": 161,
+            "sha256": "e979407d2b3e0615999efa27646b8169a46f005468c5b804c5c0fa3ca1771b4a"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tele2_ru-73.0",
+      "operator": "Tele2_ru",
+      "bundle_id": "com.apple.Tele2_ru",
+      "version": "73.0",
+      "kind": "stock",
+      "groups": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7",
+        "G8",
+        "G9"
+      ],
+      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "Tele2_ru.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/Tele2_ru.bundle/Info.plist",
+            "size": 399,
+            "sha256": "a363648736cc96b90421b09c121b913638a9eca536f697077c3c47bba5c66d33"
+          },
+          {
+            "path": "Carrier Bundles/Tele2_ru.bundle/carrier.plist",
+            "size": 1160,
+            "sha256": "082bc7f8c69a1041906d8fc01c296e57c33f03f7cde27085132147e594fe7a18"
+          },
+          {
+            "path": "Carrier Bundles/Tele2_ru.bundle/signatures/common.plist",
+            "size": 446,
+            "sha256": "eb027ea56bbe4ecb103a05844e28066a4b0e6bf2b32128e12ee51b80ff66c149"
+          },
+          {
+            "path": "Carrier Bundles/Tele2_ru.bundle/supported_devices.plist",
+            "size": 161,
+            "sha256": "e979407d2b3e0615999efa27646b8169a46f005468c5b804c5c0fa3ca1771b4a"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vimpelcom_ru-73.0",
+      "operator": "VimpelCom_ru",
+      "bundle_id": "com.apple.VimpelCom_ru",
+      "version": "73.0",
+      "kind": "stock",
+      "groups": [
+        "G1",
+        "G2",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7",
+        "G8",
+        "G9"
+      ],
+      "note": "Штатный профиль оператора из публичного дампа iOS 27.2.",
+      "source": {
+        "type": "files",
+        "repo": "dwilliamsuk/ios-carrier-bundles",
+        "commit": "a434a25c4be1f4319569ccc80f9e70c5be6072aa",
+        "bundle_name": "VimpelCom_ru.bundle",
+        "files": [
+          {
+            "path": "Carrier Bundles/VimpelCom_ru.bundle/Info.plist",
+            "size": 407,
+            "sha256": "ec48afbf7a17457fd9e22cb4e83e3cef4cb5a6cb4b1203de62e75c591afe443b"
+          },
+          {
+            "path": "Carrier Bundles/VimpelCom_ru.bundle/carrier.plist",
+            "size": 5620,
+            "sha256": "37fe721376c131850afb73015ab4b5324de4dc55101743fe764db268800ede09"
+          },
+          {
+            "path": "Carrier Bundles/VimpelCom_ru.bundle/signatures/common.plist",
+            "size": 446,
+            "sha256": "26598f47d446b546b841a268e0c7a421e2ae1ff78e3a98fd312e2cc9fe0f39b6"
+          },
+          {
+            "path": "Carrier Bundles/VimpelCom_ru.bundle/supported_devices.plist",
+            "size": 161,
+            "sha256": "e979407d2b3e0615999efa27646b8169a46f005468c5b804c5c0fa3ca1771b4a"
+          }
+        ]
+      }
+    }
+  ]
+}

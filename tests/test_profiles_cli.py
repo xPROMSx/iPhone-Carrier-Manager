@@ -39,6 +39,7 @@ def test_empty_database_no_device(args, monkeypatch, capsys):
         pytest.fail("пустая база не требует телефона")
 
     monkeypatch.setattr(device, "read_device", forbidden)
+    use_database(monkeypatch, {"schema": 1, "groups": {}, "profiles": []})
     assert cli.main(args) == 0
     assert capsys.readouterr().out == "База профилей пуста\n"
 
