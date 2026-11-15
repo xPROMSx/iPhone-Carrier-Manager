@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from test_install import rig as installation_rig  # noqa: F401
 
 from carrier_profile_tool import cli, device, menu, profiles
 from carrier_profile_tool.ipcc import inspect_bytes
@@ -27,6 +28,7 @@ def setup_menu(monkeypatch, rows, zip_bytes):
         entry(target.identifier, target.version),
         entry(previous.identifier, previous.version),
     )
+    entries[1].kind = "donor"
     database = profiles.ProfileDatabase({
         "test": profiles.Group("Тест", ("iPhone18,1",), ()),
     }, entries)
@@ -63,11 +65,13 @@ def test_success(setup_menu):
     s = setup_menu
     code, output = run(["1", "1", "1", ""])
     assert code == 0
-    s.installer.assert_awaited_once_with(s.target, s.previous, "slot:kOne")
+    s.installer.assert_awaited_once_with(
+        s.target, s.previous, "slot:kOne", plain=True, tested=False, from_database=True
+    )
     for line in s.lines:
         assert line.international_mobile_subscriber_identity not in output
         assert line.integrated_circuit_card_identity not in output
-    assert "не проверялось на этой модели" in output
+    assert "не проверялось на этой модели" not in output
     assert "Нажмите Enter" in output
 
 
@@ -75,7 +79,9 @@ def test_multiple_lines(setup_menu):
     s = setup_menu
     s.phone.lines = s.lines
     run(["1", "2", "1", ""])
-    s.installer.assert_awaited_once_with(s.target, s.previous, "slot:kTwo")
+    s.installer.assert_awaited_once_with(
+        s.target, s.previous, "slot:kTwo", plain=True, tested=False, from_database=True
+    )
 
 
 @pytest.mark.parametrize("answers", [
@@ -197,3 +203,53 @@ def test_invalid_local_package(setup_menu, tmp_path):
     assert code == 1
     assert "Операция не выполнена" in output
     s.installer.assert_not_awaited()
+
+
+@pytest.mark.usefixtures("installation_rig")
+def test_full_menu(setup_menu, monkeypatch, capsys):
+    from carrier_profile_tool import install
+
+    setup_menu.entries[0].note = "Штатный профиль оператора из тестовой базы."
+    monkeypatch.setattr(menu, "install_packages", install.install_packages)
+    answers = iter(["1", "1", "1", ""])
+
+    def read(prompt):
+        print(prompt)
+        return next(answers)
+
+    def confirm(prompt):
+        print(prompt)
+        return "INSTALL"
+
+    monkeypatch.setattr("builtins.input", confirm)
+    assert asyncio.run(menu.run_menu(read, print)) == 0
+    output = capsys.readouterr().out
+    assert all(len(line) <= 78 for line in output.splitlines())
+    for forbidden in ("UNVERIFIED", "донор", "штатный", "Маска", "--previous",
+                      "не проверялось на этой модели"):
+        assert forbidden.lower() not in output.lower()
+    assert output.count("на свой страх и риск") == 1
+    assert "Российские операторы" in output and "Другие операторы" in output
+    assert "Для продолжения введите ровно INSTALL:" in output
+    assert "ПОДТВЕРЖДЕНО (перезагрузка подтверждена косвенно)" in output
+    print(output)
+
+
+def test_plain_confirmation_and_failure(setup_menu, monkeypatch, capsys):
+    from carrier_profile_tool import install
+
+    s = setup_menu
+    s.phone.ios = "27.1"
+    monkeypatch.setattr(install.sys, "stdin", SimpleNamespace(isatty=lambda: True))
+    monkeypatch.setattr("builtins.input", lambda prompt: "INSTALL")
+    previous = SimpleNamespace(identifier=s.previous.identifier, version="0.9")
+    install.confirm(s.phone, "slot:kOne", s.target, "приблизительный возврат, версия другая",
+                    plain=True, previous=previous, tested=True, from_database=False)
+    assert install.finish(["телефон не вернулся"], "slot:kOne", plain=True) == 4
+    output = capsys.readouterr().out
+    assert "возврат приблизительный" in " ".join(output.split())
+    assert "Свой файл: подлинность не проверялась." in output
+    assert "Версия iOS на телефоне (27.1)" in output
+    assert "на свой страх и риск" not in output
+    assert "НЕ ПОДТВЕРЖДЕНО: телефон не вернулся" in output
+    assert all(len(line) <= 78 for line in output.splitlines())

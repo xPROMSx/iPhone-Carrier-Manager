@@ -4,6 +4,7 @@ import asyncio
 import logging
 import sys
 import tempfile
+import textwrap
 from contextlib import nullcontext
 from enum import Enum, auto
 from pathlib import Path
@@ -168,20 +169,70 @@ def verify_result(before, after, selector, package):
     return reasons
 
 
-def show_profiles(snapshot):
+def show_profiles(snapshot, plain=False):
     from carrier_profile_tool.cli import profile, safe
 
     for line in snapshot.lines:
-        print(f"Линия slot:{safe(line.slot)}")
-        profile("Прочитанный профиль", line.identifier, line.version)
+        if plain:
+            plain_text(f"Линия slot:{safe(line.slot)}: "
+                       f"{safe(line.identifier).removeprefix('com.apple.')}, "
+                       f"версия {safe(line.version)}")
+        else:
+            print(f"Линия slot:{safe(line.slot)}")
+            profile("Прочитанный профиль", line.identifier, line.version)
     if snapshot.line_problem:
         print("Линии определены неполно или неоднозначно.")
 
 
-def confirm(before, selector, package, rollback):
+def plain_text(text, indent=""):
+    print(textwrap.fill(text, width=78, initial_indent=indent, subsequent_indent=indent))
+
+
+def confirm(before, selector, package, rollback, plain=False, previous=None,
+            tested=False, from_database=False):
     from carrier_profile_tool.cli import profile, safe
 
     line = device.choose_line(before, selector)
+    if plain:
+        plain_text(f"Линия:             slot:{safe(line.slot)}")
+        plain_text(f"Сейчас на линии:   {safe(line.identifier).removeprefix('com.apple.')}, "
+                   f"версия {safe(line.version)}")
+        plain_text(f"Будет установлен:  {safe(package.identifier).removeprefix('com.apple.')}, "
+                   f"версия {safe(package.version)}")
+        label = ("Прежний профиль подготовлен для повторной установки"
+                 if rollback == "точный возврат" else
+                 "Прежний профиль подготовлен (версия отличается от текущей, "
+                 "возврат приблизительный)")
+        plain_text(f"{label}: {safe(previous.identifier).removeprefix('com.apple.')}, "
+                   f"версия {safe(previous.version)}")
+        print("\nЧто произойдёт:")
+        for text in (
+            "профиль будет записан на выбранную линию, другие линии программа не трогает;",
+            "iPhone перезагрузится;",
+            "программа прочитает настройки телефона и покажет результат.",
+        ):
+            print(textwrap.fill("- " + text, width=78, initial_indent="  ",
+                                subsequent_indent="    "))
+        print("\nЧто важно знать:")
+        facts = ["повторная установка прежнего профиля может не вернуть все настройки;",
+                 "программа ничего не удаляет;"]
+        if not tested:
+            facts.append("тесты проводились выборочно на узком круге моделей, все действия "
+                         "вы выполняете на свой страх и риск.")
+        for text in facts:
+            print(textwrap.fill("- " + text, width=78, initial_indent="  ",
+                                subsequent_indent="    "))
+        print()
+        plain_text("Файлы профиля проверены по контрольным суммам из базы." if from_database
+                   else "Свой файл: подлинность не проверялась.")
+        if before.ios != "27.2.1":
+            plain_text(f"Версия iOS на телефоне ({safe(before.ios)}) отличается от той, "
+                       "на которой проверялась программа.")
+        print()
+        plain_text("Не отключайте кабель и не трогайте телефон до конца. "
+                   "После перезагрузки разблокируйте его.")
+        print()
+        return confirm_input()
     print(f"Модель: {safe(before.product)}; iOS: {safe(before.ios)}")
     print(f"Линия: slot:{safe(line.slot)}")
     profile("Текущий профиль", line.identifier, line.version)
@@ -204,6 +255,10 @@ def confirm(before, selector, package, rollback):
     print(
         "Не отключайте кабель и не трогайте телефон до конца. После перезагрузки разблокируйте его."
     )
+    return confirm_input()
+
+
+def confirm_input():
     if not sys.stdin.isatty():
         raise device.DeviceError("Подтверждение требует терминала (TTY).")
     try:
@@ -214,9 +269,23 @@ def confirm(before, selector, package, rollback):
         raise device.DeviceError("Установка отменена: подтверждение не получено.")
 
 
-def finish(reasons, selector):
+def finish(reasons, selector, plain=False):
     from carrier_profile_tool.cli import safe
 
+    if plain:
+        print("\nРезультат")
+        print("-" * 62)
+        if reasons:
+            plain_text("НЕ ПОДТВЕРЖДЕНО: " + "; ".join(reasons))
+            plain_text("Результат не подтверждён. Проверьте настройки телефона. Не запускайте "
+                       "установку повторно, пока не убедитесь в состоянии телефона.")
+        else:
+            print("ПОДТВЕРЖДЕНО (перезагрузка подтверждена косвенно)")
+            plain_text("Профиль установлен, iPhone перезагружен, настройки прочитаны.")
+        print()
+        plain_text("Чтобы поставить прежний профиль снова, запустите программу, выберите ту же "
+                   "линию и этот профиль в списке (если его там нет, укажите свой файл).")
+        return 4 if reasons else 0
     if reasons:
         print("НЕ ПОДТВЕРЖДЕНО: " + "; ".join(reasons))
     else:
@@ -229,14 +298,16 @@ def finish(reasons, selector):
     return 4 if reasons else 0
 
 
-async def installation_failure_readback(serial, cache):
+async def installation_failure_readback(serial, cache, plain=False):
     try:
-        show_profiles(await asyncio.wait_for(read_same(serial, cache), timeouts.READ))
+        snapshot = await asyncio.wait_for(read_same(serial, cache), timeouts.READ)
+        show_profiles(snapshot, plain=True) if plain else show_profiles(snapshot)
     except (Exception, asyncio.CancelledError, KeyboardInterrupt):
         print("Однократное чтение телефона не выполнено.")
 
 
-async def run_install(source, selector, previous, cache):
+async def run_install(source, selector, previous, cache, plain=False, tested=False,
+                      from_database=False):
     from pymobiledevice3.exceptions import AppInstallError
 
     client = None
@@ -251,7 +322,11 @@ async def run_install(source, selector, previous, cache):
         line = device.choose_line(before, selector)
         rollback = classify_previous(previous, line)
         data = prepare(source, line)
-        confirm(before, selector, source, rollback)
+        if plain:
+            confirm(before, selector, source, rollback, plain=True, previous=previous,
+                    tested=tested, from_database=from_database)
+        else:
+            confirm(before, selector, source, rollback)
         latest = await asyncio.wait_for(fresh_snapshot(client), timeouts.READ)
         if latest != before:
             raise device.DeviceError("Данные телефона изменились; установка отменена.")
@@ -270,7 +345,10 @@ async def run_install(source, selector, previous, cache):
                 reason = "результат установки неизвестен"
             await close_quietly(client)
             client = None
-            await installation_failure_readback(serial, cache)
+            if plain:
+                await installation_failure_readback(serial, cache, plain=True)
+            else:
+                await installation_failure_readback(serial, cache)
             return [reason]
         try:
             await restart_once(client)
@@ -288,7 +366,8 @@ async def run_install(source, selector, previous, cache):
         except device.DeviceError:
             reasons.append("телефон не вернулся или не удалось прочитать его за 300 с")
         else:
-            show_profiles(after)
+            if not plain:
+                show_profiles(after)
             reasons.extend(verify_result(before, after, selector, source))
         return reasons
     except (Exception, asyncio.CancelledError, KeyboardInterrupt):
@@ -305,7 +384,8 @@ async def install_file(path, selector, previous_path):
     return await install_packages(source, previous, selector)
 
 
-async def install_packages(source, previous, selector):
+async def install_packages(source, previous, selector, plain=False, tested=False,
+                           from_database=False):
     disabled = logging.root.manager.disable
     logging.disable(logging.CRITICAL)
     result = None
@@ -317,11 +397,15 @@ async def install_packages(source, previous, selector):
             else tempfile.TemporaryDirectory(prefix="icm-")
         )
         with context as folder:
-            result = await run_install(source, selector, previous, Path(folder))
+            if plain:
+                result = await run_install(source, selector, previous, Path(folder), plain=True,
+                                           tested=tested, from_database=from_database)
+            else:
+                result = await run_install(source, selector, previous, Path(folder))
     except (Exception, asyncio.CancelledError, KeyboardInterrupt):
         if result is None:
             raise
         result.append("не удалось завершить очистку временного каталога")
     finally:
         logging.disable(disabled)
-    return finish(result, selector)
+    return finish(result, selector, plain=True) if plain else finish(result, selector)
